@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coaching 1: Goals</title>
+<style>
+:root {
+  --ochre: #E8D5B5;
+  --brown: #3E2723;
+  --purple: #4A148C;
+  --orange: #D84315;
+  --burgundy: #6B1A2C;
+  --cream: #F5EDE0;
+  --brown-light: #5D4037;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  background: var(--ochre);
+  color: var(--brown);
+  overflow: hidden;
+  letter-spacing: -0.02em;
+}
+
+.screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ochre);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.screen.active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+body.has-strip .screen {
+  height: calc(100vh - 60px);
+}
+
+.content {
+  max-width: 900px;
+  width: 90%;
+  position: relative;
+  z-index: 2;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+}
+
+p, .outcome-text {
+  font-size: clamp(1.4rem, 2vw, 1.6rem);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.subtitle {
+  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+  color: var(--brown-light);
+  margin-bottom: 2rem;
+}
+
+button {
+  font-family: inherit;
+  font-size: clamp(1.2rem, 1.8vw, 1.4rem);
+  font-weight: 600;
+  background: var(--brown);
+  color: var(--cream);
+  border: none;
+  border-radius: 0;
+  min-height: 60px;
+  padding: 0.8rem 2.5rem;
+  cursor: pointer;
+  letter-spacing: -0.02em;
+  transition: background 0.15s ease;
+  display: inline-block;
+  margin-top: 1.5rem;
+}
+
+button:hover {
+  background: #2C1A18;
+}
+
+button:focus-visible {
+  outline: 3px solid var(--purple);
+  outline-offset: 3px;
+}
+
+.vote-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin-top: 0.8rem;
+  padding: 1rem 1.5rem;
+  min-height: 60px;
+}
+
+.vote-btn:first-of-type {
+  margin-top: 1.5rem;
+}
+
+.vote-heading {
+  font-size: clamp(1.2rem, 1.8vw, 1.4rem);
+  font-weight: 600;
+  margin-top: 1.5rem;
+  color: var(--brown-light);
+}
+
+.outcome {
+  display: none;
+  border-left: 4px solid var(--brown-light);
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.outcome.chosen-s1 {
+  border-left: 4px solid var(--purple);
+}
+
+.outcome.chosen-s2 {
+  border-left: 4px solid var(--orange);
+}
+
+.outcome.chosen-s3 {
+  border-left: 4px solid var(--burgundy);
+}
+
+.outcome.chosen-s4 {
+  border-left: 4px solid var(--purple);
+}
+
+.outcome-text {
+  font-size: clamp(1.1rem, 1.6vw, 1.3rem);
+  margin-bottom: 0;
+}
+
+.outcome-label {
+  font-weight: 700;
+}
+
+.callout {
+  background: var(--cream);
+  border-left: 4px solid var(--brown);
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.callout p {
+  font-size: clamp(1.1rem, 1.6vw, 1.3rem);
+  margin-bottom: 0;
+}
+
+.discuss-prompt {
+  font-style: italic;
+  font-size: clamp(1.4rem, 2vw, 1.6rem);
+  margin-bottom: 0.8rem;
+}
+
+.motif {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.motif-circle {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: var(--purple);
+  opacity: 0.12;
+  top: -60px;
+  right: -60px;
+}
+
+.motif-triangle {
+  width: 0;
+  height: 0;
+  border-left: 125px solid transparent;
+  border-right: 125px solid transparent;
+  border-bottom: 250px solid var(--orange);
+  opacity: 0.12;
+  bottom: -40px;
+  left: -40px;
+  background: transparent;
+}
+
+.motif-cross {
+  opacity: 0.12;
+  top: 50%;
+  right: 60px;
+  transform: translateY(-50%);
+  width: 200px;
+  height: 200px;
+}
+
+.motif-cross::before,
+.motif-cross::after {
+  content: '';
+  position: absolute;
+  background: var(--burgundy);
+}
+
+.motif-cross::before {
+  width: 200px;
+  height: 40px;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+
+.motif-cross::after {
+  width: 40px;
+  height: 200px;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+.motif-s4 {
+  opacity: 0.12;
+  bottom: -60px;
+  right: -60px;
+  width: 300px;
+  height: 300px;
+}
+
+.motif-s4::before {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: var(--purple);
+  top: 30px;
+  left: 30px;
+}
+
+.motif-s4::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 100px solid transparent;
+  border-right: 100px solid transparent;
+  border-bottom: 180px solid var(--orange);
+  top: 70px;
+  left: 50px;
+}
+
+.title-composition {
+  position: relative;
+  width: 360px;
+  height: 200px;
+  margin: 2rem auto 0;
+}
+
+.title-composition .tc-circle {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--purple);
+  opacity: 0.7;
+  top: 10px;
+  left: 20px;
+}
+
+.title-composition .tc-triangle {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 55px solid transparent;
+  border-right: 55px solid transparent;
+  border-bottom: 100px solid var(--orange);
+  opacity: 0.7;
+  top: 50px;
+  left: 130px;
+}
+
+.title-composition .tc-cross {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  top: 90px;
+  left: 60px;
+  opacity: 0.7;
+}
+
+.title-composition .tc-cross::before,
+.title-composition .tc-cross::after {
+  content: '';
+  position: absolute;
+  background: var(--burgundy);
+}
+
+.title-composition .tc-cross::before {
+  width: 80px;
+  height: 16px;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+
+.title-composition .tc-cross::after {
+  width: 16px;
+  height: 80px;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+.title-composition .tc-diamond {
+  position: absolute;
+  width: 55px;
+  height: 55px;
+  background: linear-gradient(135deg, var(--purple) 50%, var(--orange) 50%);
+  opacity: 0.7;
+  top: 60px;
+  left: 260px;
+  transform: rotate(45deg);
+}
+
+.debrief-composition {
+  position: relative;
+  width: 260px;
+  height: 140px;
+  margin: 0 auto 2rem;
+}
+
+.debrief-composition .dc-circle {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: var(--purple);
+  opacity: 0.7;
+  top: 5px;
+  left: 10px;
+}
+
+.debrief-composition .dc-triangle {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 35px solid transparent;
+  border-right: 35px solid transparent;
+  border-bottom: 65px solid var(--orange);
+  opacity: 0.7;
+  top: 30px;
+  left: 90px;
+}
+
+.debrief-composition .dc-cross {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  top: 60px;
+  left: 40px;
+  opacity: 0.7;
+}
+
+.debrief-composition .dc-cross::before,
+.debrief-composition .dc-cross::after {
+  content: '';
+  position: absolute;
+  background: var(--burgundy);
+}
+
+.debrief-composition .dc-cross::before {
+  width: 50px;
+  height: 10px;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+
+.debrief-composition .dc-cross::after {
+  width: 10px;
+  height: 50px;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+.debrief-composition .dc-diamond {
+  position: absolute;
+  width: 35px;
+  height: 35px;
+  background: linear-gradient(135deg, var(--purple) 50%, var(--orange) 50%);
+  opacity: 0.7;
+  top: 55px;
+  left: 175px;
+  transform: rotate(45deg);
+}
+
+.scenario-line {
+  font-size: clamp(1.2rem, 1.8vw, 1.4rem);
+  margin-bottom: 0.6rem;
+  line-height: 1.5;
+}
+
+.scenario-line .icon-purple { color: var(--purple); }
+.scenario-line .icon-orange { color: var(--orange); }
+.scenario-line .icon-burgundy { color: var(--burgundy); }
+.scenario-line .icon-s4 {
+  background: linear-gradient(135deg, var(--purple), var(--orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.final-line {
+  font-size: clamp(1.6rem, 2.5vw, 2rem);
+  font-weight: 700;
+  margin-top: 2rem;
+}
+
+.reveal-body {
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+body.has-strip .reveal-body {
+  max-height: calc(100vh - 220px);
+}
+
+.reveal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.reveal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.reveal-body::-webkit-scrollbar-thumb {
+  background: var(--brown-light);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.consequence-svg {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* Confidence gauge */
+.confidence-buttons {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.confidence-btn {
+  color: var(--cream);
+  padding: 1.5rem 2.5rem;
+  min-width: 150px;
+  margin-top: 0;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.confidence-btn:hover {
+  opacity: 0.85;
+}
+
+.confidence-btn.btn-burgundy { background: var(--burgundy); }
+.confidence-btn.btn-orange { background: var(--orange); }
+.confidence-btn.btn-purple { background: var(--purple); }
+
+/* Confidence badge on reveal */
+.confidence-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.5rem 1rem;
+  color: var(--cream);
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: none;
+}
+
+.confidence-badge-s1 { background: var(--purple); }
+.confidence-badge-s2 { background: var(--orange); }
+.confidence-badge-s3 { background: var(--burgundy); }
+.confidence-badge-s4 { background: var(--purple); }
+
+/* Side effects strip */
+#side-effects-strip {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: var(--brown);
+  color: var(--cream);
+  display: none;
+  align-items: center;
+  padding: 0 1.5rem;
+  z-index: 10;
+  font-size: 0.95rem;
+  gap: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+#side-effects-strip .side-effect {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  flex-shrink: 0;
+}
+
+#side-effects-strip .side-effect.visible {
+  opacity: 1;
+}
+
+#side-effects-strip .separator {
+  margin: 0 0.8rem;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+/* Challenge line */
+.challenge-line {
+  font-style: italic;
+  color: var(--brown-light);
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+/* Prescription label (debrief) */
+.prescription-label {
+  background: var(--cream);
+  border: 2px solid var(--brown);
+  padding: 2rem;
+  text-align: left;
+  max-width: 700px;
+  margin: 1.5rem auto;
+}
+
+.prescription-label h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.prescription-label .prescription-item {
+  font-size: clamp(1.1rem, 1.6vw, 1.3rem);
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.prescription-label .prescription-footer {
+  font-size: 0.95rem;
+  margin-top: 1.2rem;
+  color: var(--brown-light);
+}
+
+@media (max-width: 768px) {
+  .motif {
+    display: none;
+  }
+  .confidence-buttons {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .confidence-btn {
+    min-width: auto;
+    width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- TITLE -->
+<div class="screen active" id="title">
+  <div class="content text-center">
+    <h1>Coaching 1: Goals</h1>
+    <p class="subtitle">Exploring how we set goals and what can often go wrong</p>
+    <div class="title-composition">
+      <div class="tc-circle"></div>
+      <div class="tc-triangle"></div>
+      <div class="tc-cross"></div>
+      <div class="tc-diamond"></div>
+    </div>
+    <button onclick="showScreen('intro')">Begin &rarr;</button>
+  </div>
+</div>
+
+<!-- INTRO -->
+<div class="screen" id="intro">
+  <div class="content">
+    <p>Goal setting is the most prescribed tool in personal development. Specific, challenging goals have been shown to boost performance across hundreds of studies.</p>
+    <p>But what if the prescription has side effects?</p>
+    <p>You are about to meet four students starting university, just like you. Each one sets a goal. Your job: decide what they should do.</p>
+    <button onclick="showScreen('s1_setup')">Meet the first student &rarr;</button>
+  </div>
+</div>
+
+<!-- SCENARIO 1: The GPA Trap -->
+
+<div class="screen" id="s1_setup">
+  <div class="motif motif-circle"></div>
+  <div class="content">
+    <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 1.5rem;">
+      <rect x="25" y="132" width="150" height="8" stroke="var(--brown)" stroke-width="3" fill="var(--cream)" rx="1" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="42" y1="140" x2="42" y2="182" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="158" y1="140" x2="158" y2="182" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="78" cy="92" r="14" stroke="var(--brown)" stroke-width="3" fill="var(--cream)"/>
+      <path d="M78 106 Q74 118 66 132" stroke="var(--brown)" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M78 114 Q92 124 98 132" stroke="var(--brown)" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <line x1="66" y1="140" x2="62" y2="180" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="78" y1="140" x2="82" y2="180" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+      <rect x="118" y="116" width="32" height="7" rx="1" stroke="var(--brown)" stroke-width="2" fill="var(--cream)"/>
+      <rect x="115" y="108" width="36" height="7" rx="1" stroke="var(--brown)" stroke-width="2" fill="var(--cream)"/>
+      <rect x="117" y="100" width="33" height="7" rx="1" stroke="var(--brown)" stroke-width="2" fill="var(--cream)"/>
+      <rect x="114" y="92" width="37" height="7" rx="1" stroke="var(--brown)" stroke-width="2" fill="var(--cream)"/>
+      <rect x="116" y="84" width="34" height="7" rx="1" stroke="var(--brown)" stroke-width="2" fill="var(--cream)"/>
+      <polygon points="132,22 137,40 156,40 141,50 146,66 132,55 118,66 123,50 108,40 127,40" fill="var(--purple)" stroke="var(--brown)" stroke-width="2" stroke-linejoin="round"/>
+    </svg>
+    <p><strong>Alex</strong> has just arrived at university. Their parents are proud. Their school teachers said they had potential. Alex wants to prove them all right.</p>
+    <p>In their first coaching meeting, the coach asks: <em>&ldquo;What does success look like for you this year?&rdquo;</em></p>
+    <p>Alex thinks for a moment and says: <em>&ldquo;I want to do really well academically. That&rsquo;s the priority.&rdquo;</em></p>
+    <p>The coach asks Alex to turn this into a clear goal.</p>
+    <button onclick="showScreen('s1_vote')">What goal should Alex set? &rarr;</button>
+  </div>
+</div>
+
+<div class="screen" id="s1_vote">
+  <div class="motif motif-circle"></div>
+  <div class="content">
+    <h2>What goal should Alex set?</h2>
+    <button class="vote-btn" onclick="vote('s1','A')"><strong>A.</strong> &ldquo;Achieve a 3.8 GPA by the end of semester one.&rdquo;</button>
+    <button class="vote-btn" onclick="vote('s1','B')"><strong>B.</strong> &ldquo;Study for at least 3 hours every evening, Monday to Friday.&rdquo;</button>
+    <button class="vote-btn" onclick="vote('s1','C')"><strong>C.</strong> &ldquo;Do my best across all my modules.&rdquo;</button>
+    <p class="vote-heading">Vote now.</p>
+  </div>
+</div>
+
+<div class="screen" id="s1_confidence">
+  <div class="motif motif-circle"></div>
+  <div class="content text-center">
+    <h2>How confident are you this will work?</h2>
+    <div class="confidence-buttons">
+      <button class="confidence-btn btn-burgundy" onclick="setConfidence('s1','low')">Not very</button>
+      <button class="confidence-btn btn-orange" onclick="setConfidence('s1','medium')">Fairly</button>
+      <button class="confidence-btn btn-purple" onclick="setConfidence('s1','high')">Very</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="s1_reveal">
+  <div class="motif motif-circle"></div>
+  <div class="content">
+    <h2>What actually happened</h2>
+    <div class="reveal-body">
+      <div class="outcome" id="s1_outcome_A">
+        <span class="confidence-badge confidence-badge-s1"></span>
+        <div class="consequence-svg">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="15" y="12" width="90" height="80" fill="var(--cream)" stroke="var(--brown)" stroke-width="3" rx="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="15" y1="82" x2="105" y2="82" stroke="var(--brown)" stroke-width="2"/>
+            <circle cx="60" cy="50" r="8" stroke="var(--brown-light)" stroke-width="2" fill="none" opacity="0.4"/>
+            <line x1="60" y1="58" x2="60" y2="75" stroke="var(--brown-light)" stroke-width="2" opacity="0.4"/>
+            <line x1="50" y1="65" x2="70" y2="65" stroke="var(--brown-light)" stroke-width="2" opacity="0.4"/>
+            <path d="M15 100 Q60 95 105 100" stroke="var(--brown-light)" stroke-width="1.5" fill="none" opacity="0.3"/>
+          </svg>
+        </div>
+        <p class="outcome-text"><span class="outcome-label">A. The 3.8 GPA</span>: Alex hit 3.82. But by December, they had skipped every social event, dropped out of the sports club they&rsquo;d joined in Week 1, and turned down a team consulting project that carried no grade weight. In January, they felt isolated, could point to no skills beyond exam technique, and had nothing to talk about in interviews except grades.</p>
+      </div>
+      <div class="outcome" id="s1_outcome_B">
+        <span class="confidence-badge confidence-badge-s1"></span>
+        <div class="consequence-svg">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="48" r="25" fill="var(--cream)" stroke="var(--brown)" stroke-width="3"/>
+            <rect x="48" y="73" width="24" height="14" rx="2" fill="var(--cream)" stroke="var(--brown)" stroke-width="3"/>
+            <line x1="50" y1="79" x2="70" y2="79" stroke="var(--brown)" stroke-width="2"/>
+            <line x1="50" y1="83" x2="70" y2="83" stroke="var(--brown)" stroke-width="2"/>
+            <line x1="60" y1="14" x2="60" y2="6" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.3"/>
+            <line x1="84" y1="30" x2="91" y2="24" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.25"/>
+            <line x1="36" y1="30" x2="29" y2="24" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.25"/>
+            <line x1="90" y1="48" x2="98" y2="48" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.15"/>
+            <line x1="30" y1="48" x2="22" y2="48" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.15"/>
+          </svg>
+        </div>
+        <p class="outcome-text"><span class="outcome-label">B. Three hours every evening</span>: Alex sat at their desk reliably. But &ldquo;study&rdquo; became passive re-reading. The goal measured time rather than learning. By November, Alex was logging hours but retaining little; they had stopped exercising, seeing friends, or sleeping properly to protect the routine.</p>
+      </div>
+      <div class="outcome" id="s1_outcome_C">
+        <span class="confidence-badge confidence-badge-s1"></span>
+        <div class="consequence-svg">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M42 95 L48 108 L72 108 L78 95 Z" fill="var(--cream)" stroke="var(--brown)" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M60 95 Q60 65 46 48" fill="none" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+            <ellipse cx="38" cy="44" rx="14" ry="7" fill="var(--ochre)" stroke="var(--brown)" stroke-width="2" transform="rotate(-35 38 44)"/>
+            <circle cx="36" cy="35" r="7" fill="var(--ochre)" stroke="var(--brown)" stroke-width="2"/>
+          </svg>
+        </div>
+        <p class="outcome-text"><span class="outcome-label">C. &ldquo;Do my best&rdquo;</span>: Without a clear target, Alex drifted. Some weeks they worked hard; others they coasted. By mid-semester they had lost track of whether they were progressing, and felt anxious yet directionless.</p>
+      </div>
+      <div class="callout">
+        <p><strong>The pattern:</strong> Every option failed. The source of the failure was upstream. Alex left &ldquo;success at university&rdquo; undefined beyond a single dimension. A single metric replaced a complex aspiration, and everything outside it was abandoned.</p>
+      </div>
+    </div>
+    <button onclick="showScreen('s1_discuss')">Discuss &rarr;</button>
+  </div>
+</div>
+
+<div class="screen" id="s1_discuss">
+  <div class="motif motif-circle"></div>
+  <div class="content">
+    <h2>To the room:</h2>
+    <p class="discuss-prompt">What did Alex actually want? Was it really just a number?</p>
+    <p class="discuss-prompt">What got sacrificed, and why did the goal leave it exposed?</p>
+    <button onclick="showScreen('s2_setup')">Meet the next student &rarr;</button>
+  </div>
+</div>
+
+<!-- SCENARIO 2: The Summit -->
+
+<div class="screen" id="s2_setup">
+  <div class="motif motif-triangle"></div>
+  <div class="content">
+    <p class="challenge-line" id="s2_challenge"></p>
+    <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 1.5rem;">
+      <polygon points="100,25 170,165 30,165" fill="none" stroke="var(--brown)" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M55 150 L70 135 L80 140 L95 120 L105 128 L115 105 L125 115 L135 90 L142 100" fill="none" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="100" y1="25" x2="100" y2="12" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+      <polygon points="100,12 110,5 110,19" fill="var(--orange)" stroke="var(--brown)" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="45" cy="155" r="7" stroke="var(--brown)" stroke-width="3" fill="var(--cream)"/>
+      <line x1="45" y1="162" x2="45" y2="180" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="38" y1="172" x2="52" y2="172" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="42" y1="180" x2="38" y2="192" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="48" y1="180" x2="52" y2="192" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+      <ellipse cx="40" cy="190" rx="8" ry="3" fill="none" stroke="var(--orange)" stroke-width="2" opacity="0.6"/>
+      <ellipse cx="50" cy="190" rx="8" ry="3" fill="none" stroke="var(--orange)" stroke-width="2" opacity="0.6"/>
+    </svg>
+    <p><strong>Sam</strong> played a lot of sport at school and wants to stay active at university. In their coaching meeting, Sam says: <em>&ldquo;I want to get properly fit: not just dabble.&rdquo;</em></p>
+    <p>Together with their coach, Sam sets a goal: <strong>Run a half marathon before the end of the academic year.</strong></p>
+    <p>By week 6, Sam can run 5K comfortably. They feel good. Then life gets busy: exams, group projects, a part-time job.</p>
+    <button onclick="showScreen('s2_vote')">What should Sam do now? &rarr;</button>
+  </div>
+</div>
+
+<div class="screen" id="s2_vote">
+  <div class="motif motif-triangle"></div>
+  <div class="content">
+    <h2>What should Sam do now?</h2>
+    <button class="vote-btn" onclick="vote('s2','A')"><strong>A.</strong> Push through: stick to the training plan no matter what. The goal is the goal.</button>
+    <button class="vote-btn" onclick="vote('s2','B')"><strong>B.</strong> Quietly drop the half marathon idea. 5K is fine. Move on to other things.</button>
+    <button class="vote-btn" onclick="vote('s2','C')"><strong>C.</strong> Set a harder short-term target to stay motivated: aim for a 22-minute 5K.</button>
+    <p class="vote-heading">Vote now.</p>
+  </div>
+</div>
+
+<div class="screen" id="s2_confidence">
+  <div class="motif motif-triangle"></div>
+  <div class="content text-center">
+    <h2>How confident are you this will work?</h2>
+    <div class="confidence-buttons">
+      <button class="confidence-btn btn-burgundy" onclick="setConfidence('s2','low')">Not very</button>
+      <button class="confidence-btn btn-orange" onclick="setConfidence('s2','medium')">Fairly</button>
+      <button class="confidence-btn btn-purple" onclick="setConfidence('s2','high')">Very</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="s2_reveal">
+  <div class="motif motif-triangle"></div>
+  <div class="content">
+    <h2>What actually happened</h2>
+    <div class="reveal-body">
+      <div class="outcome" id="s2_outcome_A">
+        <span class="confidence-badge confidence-badge-s2"></span>
+        <div class="consequence-svg">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M35 20 L35 60 Q60 80 85 60 L85 20 Z" fill="var(--cream)" stroke="var(--brown)" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M35 32 Q18 42 35 52" fill="none" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M85 32 Q102 42 85 52" fill="none" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+            <rect x="50" y="72" width="20" height="14" fill="var(--cream)" stroke="var(--brown)" stroke-width="3"/>
+            <rect x="40" y="86" width="40" height="8" rx="1" fill="var(--cream)" stroke="var(--brown)" stroke-width="3"/>
+            <path d="M50 28 L48 42 L55 50 L50 65" fill="none" stroke="var(--brown)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <p class="outcome-text"><span class="outcome-label">A. Push through</span>: Sam forced early morning runs on too little sleep, skipped group project meetings to train, and picked up a knee injury in week 10. After two weeks off, they never went back. The fitness goal destroyed the very thing it targeted.</p>
+      </div>
+      <div class="outcome" id="s2_outcome_B">
+        <span class="confidence-badge confidence-badge-s2"></span>
+        <div class="consequence-svg">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M42 95 L48 108 L72 108 L78 95 Z" fill="var(--cream)" stroke="var(--brown)" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M60 95 Q60 65 46 48" fill="none" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+            <ellipse cx="38" cy="44" rx="14" ry="7" fill="var(--ochre)" stroke="var(--brown)" stroke-width="2" transform="rotate(-35 38 44)"/>
+            <circle cx="36" cy="35" r="7" fill="var(--ochre)" stroke="var(--brown)" stroke-width="2"/>
+          </svg>
+        </div>
+        <p class="outcome-text"><span class="outcome-label">B. Drop it</span>: Sam felt relieved for a week, then guilty. They&rsquo;d &ldquo;failed.&rdquo; The experience of quitting eroded their confidence. When a friend suggested joining a climbing club, Sam thought: <em>&ldquo;What&rsquo;s the point? I&rsquo;ll just quit that too.&rdquo;</em></p>
+      </div>
+      <div class="outcome" id="s2_outcome_C">
+        <span class="confidence-badge confidence-badge-s2"></span>
+        <div class="consequence-svg">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="48" r="25" fill="var(--cream)" stroke="var(--brown)" stroke-width="3"/>
+            <rect x="48" y="73" width="24" height="14" rx="2" fill="var(--cream)" stroke="var(--brown)" stroke-width="3"/>
+            <line x1="50" y1="79" x2="70" y2="79" stroke="var(--brown)" stroke-width="2"/>
+            <line x1="50" y1="83" x2="70" y2="83" stroke="var(--brown)" stroke-width="2"/>
+            <line x1="60" y1="14" x2="60" y2="6" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.3"/>
+            <line x1="84" y1="30" x2="91" y2="24" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.25"/>
+            <line x1="36" y1="30" x2="29" y2="24" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.25"/>
+            <line x1="90" y1="48" x2="98" y2="48" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.15"/>
+            <line x1="30" y1="48" x2="22" y2="48" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.15"/>
+          </svg>
+        </div>
+        <p class="outcome-text"><span class="outcome-label">C. Harder short-term target</span>: The 22-minute goal added pressure to something that had been enjoyable. Runs became tests. Sam started skipping sessions they might &ldquo;fail&rdquo; and only ran on days they felt fast. By December they were running once a fortnight.</p>
+      </div>
+      <div class="callout">
+        <p><strong>The pattern:</strong> Sam&rsquo;s goal lacked structure between &ldquo;I want to be fit&rdquo; and a specific race distance. When the aggressive target collided with real life, there was nothing to fall back on. Hitting it meant overreach; missing it meant failure; and achieving the smaller milestone (5K) felt like a ceiling rather than a foundation.</p>
+      </div>
+    </div>
+    <button onclick="showScreen('s2_discuss')">Discuss &rarr;</button>
+  </div>
+</div>
+
+<div class="screen" id="s2_discuss">
+  <div class="motif motif-triangle"></div>
+  <div class="content">
+    <h2>To the room:</h2>
+    <p class="discuss-prompt">Sam could run 5K, a real achievement. Why did it feel hollow?</p>
+    <p class="discuss-prompt">What was missing between &ldquo;I want to be fit&rdquo; and &ldquo;run a half marathon&rdquo;?</p>
+    <button onclick="showScreen('s3_setup')">Meet the next student &rarr;</button>
+  </div>
+</div>
+
+<!-- SCENARIO 3: The Monetiser -->
+
+<div class="screen" id="s3_setup">
+  <div class="motif motif-cross"></div>
+  <div class="content">
+    <p class="challenge-line" id="s3_challenge"></p>
+    <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 1.5rem;">
+      <text x="110" y="140" font-family="Georgia, serif" font-size="120" font-weight="700" fill="var(--burgundy)" opacity="0.3">&pound;</text>
+      <rect x="55" y="105" width="45" height="32" rx="3" fill="var(--cream)" stroke="var(--brown)" stroke-width="3" stroke-linejoin="round"/>
+      <circle cx="67" cy="121" r="8" fill="none" stroke="var(--brown)" stroke-width="2"/>
+      <rect x="82" y="112" width="12" height="6" rx="1" fill="none" stroke="var(--brown)" stroke-width="2"/>
+      <line x1="77" y1="105" x2="77" y2="95" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="77" y1="95" x2="82" y2="92" stroke="var(--brown)" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="50" cy="80" r="12" stroke="var(--brown)" stroke-width="3" fill="var(--cream)"/>
+      <line x1="50" y1="92" x2="50" y2="125" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+      <path d="M50 100 Q60 108 65 105" stroke="var(--brown)" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M50 100 Q40 108 38 115" stroke="var(--brown)" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <line x1="46" y1="125" x2="40" y2="155" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="54" y1="125" x2="60" y2="155" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <p><strong>Jordan</strong> is a talented photographer. They&rsquo;ve done it since they were 14; it&rsquo;s the thing that makes them feel most like themselves. At university, Jordan sees classmates starting side projects and thinks: <em>&ldquo;I should make this count for something.&rdquo;</em></p>
+    <p>In their coaching meeting, Jordan sets a goal: <strong>Earn &pound;500 from photography by the end of semester one.</strong></p>
+    <p>By week 9, Jordan has earned &pound;310. Three weeks remain. The goal is slipping.</p>
+    <button onclick="showScreen('s3_vote')">What should Jordan do? &rarr;</button>
+  </div>
+</div>
+
+<div class="screen" id="s3_vote">
+  <div class="motif motif-cross"></div>
+  <div class="content">
+    <h2>What should Jordan do?</h2>
+    <button class="vote-btn" onclick="vote('s3','A')"><strong>A.</strong> Take any paid work available: corporate headshots, event coverage, whatever pays. Grind to hit &pound;500.</button>
+    <button class="vote-btn" onclick="vote('s3','B')"><strong>B.</strong> Lower the target to &pound;350 so success is still possible.</button>
+    <button class="vote-btn" onclick="vote('s3','C')"><strong>C.</strong> Forget the number. Shoot what they love and let opportunities come naturally.</button>
+    <p class="vote-heading">Vote now.</p>
+  </div>
+</div>
+
+<div class="screen" id="s3_confidence">
+  <div class="motif motif-cross"></div>
+  <div class="content text-center">
+    <h2>How confident are you this will work?</h2>
+    <div class="confidence-buttons">
+      <button class="confidence-btn btn-burgundy" onclick="setConfidence('s3','low')">Not very</button>
+      <button class="confidence-btn btn-orange" onclick="setConfidence('s3','medium')">Fairly</button>
+      <button class="confidence-btn btn-purple" onclick="setConfidence('s3','high')">Very</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="s3_reveal">
+  <div class="motif motif-cross"></div>
+  <div class="content">
+    <h2>What actually happened</h2>
+    <div class="reveal-body">
+      <div class="outcome" id="s3_outcome_A">
+        <span class="confidence-badge confidence-badge-s3"></span>
+        <div class="consequence-svg">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M42 95 L48 108 L72 108 L78 95 Z" fill="var(--cream)" stroke="var(--brown)" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M60 95 Q60 65 46 48" fill="none" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+            <ellipse cx="38" cy="44" rx="14" ry="7" fill="var(--ochre)" stroke="var(--brown)" stroke-width="2" transform="rotate(-35 38 44)"/>
+            <circle cx="36" cy="35" r="7" fill="var(--ochre)" stroke="var(--brown)" stroke-width="2"/>
+          </svg>
+        </div>
+        <p class="outcome-text"><span class="outcome-label">A. Grind to &pound;500</span>: Jordan took three corporate jobs in two weeks. The work was tedious. They delivered acceptable but uninspired photos and started cutting corners on editing to meet deadlines. They hit &pound;510. The camera sat untouched for the next two months. The thing they loved became the thing they resented.</p>
+      </div>
+      <div class="outcome" id="s3_outcome_B">
+        <span class="confidence-badge confidence-badge-s3"></span>
+        <div class="consequence-svg">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M35 20 L35 60 Q60 80 85 60 L85 20 Z" fill="var(--cream)" stroke="var(--brown)" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M35 32 Q18 42 35 52" fill="none" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M85 32 Q102 42 85 52" fill="none" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+            <rect x="50" y="72" width="20" height="14" fill="var(--cream)" stroke="var(--brown)" stroke-width="3"/>
+            <rect x="40" y="86" width="40" height="8" rx="1" fill="var(--cream)" stroke="var(--brown)" stroke-width="3"/>
+            <path d="M50 28 L48 42 L55 50 L50 65" fill="none" stroke="var(--brown)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <p class="outcome-text"><span class="outcome-label">B. Lower the target</span>: Jordan hit &pound;380 and technically &ldquo;succeeded.&rdquo; But it felt hollow. The adjusted goal felt like an admission of inadequacy, and the entire semester&rsquo;s photography was now framed by a number rather than by growth, creativity, or identity.</p>
+      </div>
+      <div class="outcome" id="s3_outcome_C">
+        <span class="confidence-badge confidence-badge-s3"></span>
+        <div class="consequence-svg">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="48" r="25" fill="var(--cream)" stroke="var(--brown)" stroke-width="3"/>
+            <rect x="48" y="73" width="24" height="14" rx="2" fill="var(--cream)" stroke="var(--brown)" stroke-width="3"/>
+            <line x1="50" y1="79" x2="70" y2="79" stroke="var(--brown)" stroke-width="2"/>
+            <line x1="50" y1="83" x2="70" y2="83" stroke="var(--brown)" stroke-width="2"/>
+            <line x1="60" y1="14" x2="60" y2="6" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.3"/>
+            <line x1="84" y1="30" x2="91" y2="24" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.25"/>
+            <line x1="36" y1="30" x2="29" y2="24" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.25"/>
+            <line x1="90" y1="48" x2="98" y2="48" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.15"/>
+            <line x1="30" y1="48" x2="22" y2="48" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.15"/>
+          </svg>
+        </div>
+        <p class="outcome-text"><span class="outcome-label">C. Forget the number</span>: Jordan felt guilty about abandoning a goal. In their next coaching meeting, they struggled to articulate what they&rsquo;d achieved. Without any structure, &ldquo;shoot what I love&rdquo; produced great photos but zero development direction, and Jordan could not explain their progress.</p>
+      </div>
+      <div class="callout">
+        <p><strong>The pattern:</strong> Jordan attached a financial metric to something driven by identity and love of the craft. The extrinsic target displaced the intrinsic motivation. When the number came under pressure, Jordan faced a choice between compromising their standards or compromising their goal. Every version of the &pound;500 target carried this flaw: the target itself was the source of the conflict.</p>
+      </div>
+    </div>
+    <button onclick="showScreen('s3_discuss')">Discuss &rarr;</button>
+  </div>
+</div>
+
+<div class="screen" id="s3_discuss">
+  <div class="motif motif-cross"></div>
+  <div class="content">
+    <h2>To the room:</h2>
+    <p class="discuss-prompt">Jordan still cares about photography. So why did every option feel wrong?</p>
+    <p class="discuss-prompt">Is the issue the specific number, or is it where the goal was aimed?</p>
+    <button onclick="showScreen('s4_setup')">One more scenario &rarr;</button>
+  </div>
+</div>
+
+<!-- SCENARIO 4: The Numbers Game -->
+
+<div class="screen" id="s4_setup">
+  <div class="motif motif-s4"></div>
+  <div class="content">
+    <p class="challenge-line" id="s4_challenge"></p>
+    <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 1.5rem;">
+      <rect x="80" y="110" width="40" height="35" rx="2" fill="var(--cream)" stroke="var(--brown)" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M80 130 L72 145 L80 145" fill="var(--cream)" stroke="var(--brown)" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M120 130 L128 145 L120 145" fill="var(--cream)" stroke="var(--brown)" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="100" cy="98" r="12" stroke="var(--brown)" stroke-width="3" fill="var(--cream)"/>
+      <path d="M112 105 L125 98 L135 95" stroke="var(--brown)" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <polygon points="135,95 145,88 145,102" fill="var(--cream)" stroke="var(--brown)" stroke-width="2" stroke-linejoin="round"/>
+      <rect x="25" y="160" width="18" height="18" rx="1" fill="none" stroke="var(--brown)" stroke-width="2" opacity="0.4"/>
+      <rect x="50" y="160" width="18" height="18" rx="1" fill="none" stroke="var(--brown)" stroke-width="2" opacity="0.4"/>
+      <rect x="75" y="160" width="18" height="18" rx="1" fill="none" stroke="var(--brown)" stroke-width="2" opacity="0.4"/>
+      <rect x="100" y="160" width="18" height="18" rx="1" fill="none" stroke="var(--brown)" stroke-width="2" opacity="0.4"/>
+      <rect x="125" y="160" width="18" height="18" rx="1" fill="none" stroke="var(--brown)" stroke-width="2" opacity="0.4"/>
+      <rect x="150" y="160" width="18" height="18" rx="1" fill="none" stroke="var(--brown)" stroke-width="2" opacity="0.4"/>
+      <rect x="37" y="182" width="18" height="18" rx="1" fill="none" stroke="var(--brown)" stroke-width="2" opacity="0.3"/>
+      <rect x="62" y="182" width="18" height="18" rx="1" fill="none" stroke="var(--brown)" stroke-width="2" opacity="0.3"/>
+      <rect x="87" y="182" width="18" height="18" rx="1" fill="none" stroke="var(--brown)" stroke-width="2" opacity="0.3"/>
+      <rect x="112" y="182" width="18" height="18" rx="1" fill="none" stroke="var(--brown)" stroke-width="2" opacity="0.3"/>
+      <rect x="137" y="182" width="18" height="18" rx="1" fill="none" stroke="var(--brown)" stroke-width="2" opacity="0.3"/>
+      <text x="72" y="65" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="42" font-weight="700" stroke="var(--brown)" stroke-width="1" fill="url(#s4grad)">80</text>
+      <defs>
+        <linearGradient id="s4grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="var(--purple)"/>
+          <stop offset="100%" stop-color="var(--orange)"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <p><strong>Riley</strong> is president of the university Entrepreneurship Society. Membership has been flat at 40 for a year. The student union warns that funding will be cut unless numbers improve significantly.</p>
+    <p>Riley sets a goal: <strong>&ldquo;Double membership to 80 by end of semester.&rdquo;</strong></p>
+    <p>By week 7, membership is at 52. The next big event is in two weeks.</p>
+    <button onclick="showScreen('s4_vote')">What should Riley do? &rarr;</button>
+  </div>
+</div>
+
+<div class="screen" id="s4_vote">
+  <div class="motif motif-s4"></div>
+  <div class="content">
+    <h2>What should Riley do?</h2>
+    <button class="vote-btn" onclick="vote('s4','A')"><strong>A.</strong> Offer free pizza, giveaways, and raffle prizes at every event to pull in sign-ups.</button>
+    <button class="vote-btn" onclick="vote('s4','B')"><strong>B.</strong> Count anyone who attends a single event as a &ldquo;member&rdquo; to reach the target on paper.</button>
+    <button class="vote-btn" onclick="vote('s4','C')"><strong>C.</strong> Focus on making events genuinely better and accept whatever number results.</button>
+    <p class="vote-heading">Vote now.</p>
+  </div>
+</div>
+
+<div class="screen" id="s4_confidence">
+  <div class="motif motif-s4"></div>
+  <div class="content text-center">
+    <h2>How confident are you this will work?</h2>
+    <div class="confidence-buttons">
+      <button class="confidence-btn btn-burgundy" onclick="setConfidence('s4','low')">Not very</button>
+      <button class="confidence-btn btn-orange" onclick="setConfidence('s4','medium')">Fairly</button>
+      <button class="confidence-btn btn-purple" onclick="setConfidence('s4','high')">Very</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="s4_reveal">
+  <div class="motif motif-s4"></div>
+  <div class="content">
+    <h2>What actually happened</h2>
+    <div class="reveal-body">
+      <div class="outcome" id="s4_outcome_A">
+        <span class="confidence-badge confidence-badge-s4"></span>
+        <div class="consequence-svg">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="15" y="12" width="90" height="80" fill="var(--cream)" stroke="var(--brown)" stroke-width="3" rx="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="15" y1="82" x2="105" y2="82" stroke="var(--brown)" stroke-width="2"/>
+            <rect x="35" y="60" width="16" height="14" rx="1" fill="none" stroke="var(--brown-light)" stroke-width="2" opacity="0.4"/>
+            <rect x="58" y="60" width="16" height="14" rx="1" fill="none" stroke="var(--brown-light)" stroke-width="2" opacity="0.4"/>
+            <rect x="81" y="60" width="16" height="14" rx="1" fill="none" stroke="var(--brown-light)" stroke-width="2" opacity="0.3"/>
+            <rect x="35" y="38" width="16" height="14" rx="1" fill="none" stroke="var(--brown-light)" stroke-width="2" opacity="0.3"/>
+            <rect x="58" y="38" width="16" height="14" rx="1" fill="none" stroke="var(--brown-light)" stroke-width="2" opacity="0.2"/>
+            <rect x="81" y="38" width="16" height="14" rx="1" fill="none" stroke="var(--brown-light)" stroke-width="2" opacity="0.2"/>
+          </svg>
+        </div>
+        <p class="outcome-text"><span class="outcome-label">A. Free pizza and giveaways</span>: Membership hit 85. But 50 of those people came once for free food and never returned. Core members felt the society had lost its purpose. Next semester, active attendance dropped below 30: lower than where Riley started.</p>
+      </div>
+      <div class="outcome" id="s4_outcome_B">
+        <span class="confidence-badge confidence-badge-s4"></span>
+        <div class="consequence-svg">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M35 20 L35 60 Q60 80 85 60 L85 20 Z" fill="var(--cream)" stroke="var(--brown)" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M35 32 Q18 42 35 52" fill="none" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M85 32 Q102 42 85 52" fill="none" stroke="var(--brown)" stroke-width="3" stroke-linecap="round"/>
+            <rect x="50" y="72" width="20" height="14" fill="var(--cream)" stroke="var(--brown)" stroke-width="3"/>
+            <rect x="40" y="86" width="40" height="8" rx="1" fill="var(--cream)" stroke="var(--brown)" stroke-width="3"/>
+            <path d="M50 28 L48 42 L55 50 L50 65" fill="none" stroke="var(--brown)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <p class="outcome-text"><span class="outcome-label">B. Counting single-event attendees</span>: Riley reported 83 members to the student union. Funding was secured. But the number was fiction, and the whole committee knew it. A culture of &ldquo;hit the metric, sort out reality later&rdquo; set in. When the society needed engaged members to run a startup weekend, 12 people showed up.</p>
+      </div>
+      <div class="outcome" id="s4_outcome_C">
+        <span class="confidence-badge confidence-badge-s4"></span>
+        <div class="consequence-svg">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="48" r="25" fill="var(--cream)" stroke="var(--brown)" stroke-width="3"/>
+            <rect x="48" y="73" width="24" height="14" rx="2" fill="var(--cream)" stroke="var(--brown)" stroke-width="3"/>
+            <line x1="50" y1="79" x2="70" y2="79" stroke="var(--brown)" stroke-width="2"/>
+            <line x1="50" y1="83" x2="70" y2="83" stroke="var(--brown)" stroke-width="2"/>
+            <line x1="60" y1="14" x2="60" y2="6" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.3"/>
+            <line x1="84" y1="30" x2="91" y2="24" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.25"/>
+            <line x1="36" y1="30" x2="29" y2="24" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.25"/>
+            <line x1="90" y1="48" x2="98" y2="48" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.15"/>
+            <line x1="30" y1="48" x2="22" y2="48" stroke="var(--brown-light)" stroke-width="1.5" opacity="0.15"/>
+          </svg>
+        </div>
+        <p class="outcome-text"><span class="outcome-label">C. Better events, accept the number</span>: Events improved. Membership reached 58. The student union cut funding by 30%. Riley felt punished for doing the right thing. The lesson they internalised: integrity is penalised. They stopped volunteering for leadership roles.</p>
+      </div>
+      <div class="callout">
+        <p><strong>The pattern:</strong> The society existed to build a community around entrepreneurship. The membership number served as a proxy for that purpose, a stand-in for the real mission. When the proxy became the goal, every path led to either gaming the metric or suffering for refusing to.</p>
+      </div>
+    </div>
+    <button onclick="showScreen('s4_discuss')">Discuss &rarr;</button>
+  </div>
+</div>
+
+<div class="screen" id="s4_discuss">
+  <div class="motif motif-s4"></div>
+  <div class="content">
+    <h2>To the room:</h2>
+    <p class="discuss-prompt">What was the Entrepreneurship Society actually for?</p>
+    <p class="discuss-prompt">How did the membership target change what Riley was willing to do?</p>
+    <button onclick="showScreen('debrief')">See the full picture &rarr;</button>
+  </div>
+</div>
+
+<!-- DEBRIEF -->
+<div class="screen" id="debrief">
+  <div class="content text-center">
+    <div class="debrief-composition">
+      <div class="dc-circle"></div>
+      <div class="dc-triangle"></div>
+      <div class="dc-cross"></div>
+      <div class="dc-diamond"></div>
+    </div>
+    <h2>Are SMART goals the smart choice?</h2>
+    <p>Every goal was specific. Most were challenging. Several were measurable and time-bound. By every conventional standard, these were &ldquo;good&rdquo; goals.</p>
+    <p>Yet each one produced the same kinds of failure: tunnel vision, collapsed motivation, abandoned progress, eroded confidence, compromised standards.</p>
+    <p>The problem lay in what was missing around each goal.</p>
+    <div id="prescription-label" class="prescription-label"></div>
+    <p class="final-line">Next: a better architecture for goals.</p>
+  </div>
+</div>
+
+<!-- Side effects strip -->
+<div id="side-effects-strip"></div>
+
+<script>
+var state = {
+  currentScreen: 'title',
+  choices: { s1: null, s2: null, s3: null, s4: null },
+  confidence: { s1: null, s2: null, s3: null, s4: null },
+  sideEffectsRevealed: []
+};
+
+var sideEffectData = {
+  s1: { A: 'Tunnel vision', B: 'False progress', C: 'Drift', color: 'var(--purple)', name: 'Alex' },
+  s2: { A: 'Burnout', B: 'Collapsed self-efficacy', C: 'Joy killed', color: 'var(--orange)', name: 'Sam' },
+  s3: { A: 'Intrinsic motivation displaced', B: 'Hollow success', C: 'No direction', color: 'var(--burgundy)', name: 'Jordan' },
+  s4: { A: 'Metric gaming', B: 'Institutional dishonesty', C: 'Integrity penalised', color: 'var(--purple)', name: 'Riley' }
+};
+
+var confidenceLabels = {
+  low: 'Not very confident',
+  medium: 'Fairly confident',
+  high: 'Very confident'
+};
+
+var challengeLines = {
+  s2: {
+    A: 'Last time, the goal created tunnel vision. One dimension replaced a whole life. Can you spot the trap this time?',
+    B: 'Last time, the goal measured effort but missed learning. Activity replaced progress. Can you spot the trap this time?',
+    C: 'Last time, no clear target meant no traction. Freedom became drift. Can you spot the trap this time?'
+  },
+  s3: {
+    A: 'Last round, pushing through destroyed the thing the goal was supposed to build. Can you find an option that holds up?',
+    B: 'Last round, quitting a goal eroded confidence far beyond fitness. Can you find an option that holds up?',
+    C: 'Last round, raising the stakes turned something enjoyable into something stressful. Can you find an option that holds up?'
+  },
+  s4: {
+    A: 'Last round, grinding for a number displaced the love of the craft. Now the stakes are organisational. Same dynamics?',
+    B: 'Last round, lowering the bar technically “worked” but felt empty. Now the stakes are organisational. Same dynamics?',
+    C: 'Last round, dropping the target meant dropping all structure. Now the stakes are organisational. Same dynamics?'
+  }
+};
+
+var noStripScreens = ['title', 'intro', 's1_setup', 's1_vote', 's1_confidence', 'debrief'];
+
+function showScreen(id) {
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++) {
+    screens[i].classList.remove('active');
+  }
+  state.currentScreen = id;
+  var target = document.getElementById(id);
+  if (target) {
+    target.classList.add('active');
+  }
+
+  if (id === 's1_reveal') { showChosenOutcome('s1'); addSideEffect('s1'); }
+  if (id === 's2_reveal') { showChosenOutcome('s2'); addSideEffect('s2'); }
+  if (id === 's3_reveal') { showChosenOutcome('s3'); addSideEffect('s3'); }
+  if (id === 's4_reveal') { showChosenOutcome('s4'); addSideEffect('s4'); }
+
+  if (id === 's2_setup') populateChallenge('s2', 's1');
+  if (id === 's3_setup') populateChallenge('s3', 's2');
+  if (id === 's4_setup') populateChallenge('s4', 's3');
+
+  if (id === 'debrief') populatePrescriptionLabel();
+
+  updateStripVisibility(id);
+}
+
+function vote(scenario, choice) {
+  state.choices[scenario] = choice;
+  showScreen(scenario + '_confidence');
+}
+
+function setConfidence(scenario, level) {
+  state.confidence[scenario] = level;
+  showScreen(scenario + '_reveal');
+}
+
+function showChosenOutcome(scenario) {
+  var choice = state.choices[scenario];
+  var confidence = state.confidence[scenario];
+  var options = ['A', 'B', 'C'];
+  for (var i = 0; i < options.length; i++) {
+    var el = document.getElementById(scenario + '_outcome_' + options[i]);
+    if (el) {
+      if (options[i] === choice) {
+        el.style.display = 'block';
+        el.classList.add('chosen-' + scenario);
+        var badge = el.querySelector('.confidence-badge');
+        if (badge && confidence) {
+          badge.textContent = confidenceLabels[confidence];
+          badge.style.display = 'block';
+        }
+      } else {
+        el.style.display = 'none';
+        el.classList.remove('chosen-' + scenario);
+      }
+    }
+  }
+}
+
+function addSideEffect(scenario) {
+  if (state.sideEffectsRevealed.indexOf(scenario) !== -1) return;
+  state.sideEffectsRevealed.push(scenario);
+
+  var strip = document.getElementById('side-effects-strip');
+  var choice = state.choices[scenario];
+  var data = sideEffectData[scenario];
+
+  if (state.sideEffectsRevealed.length > 1) {
+    var sep = document.createElement('span');
+    sep.className = 'separator';
+    sep.textContent = '|';
+    strip.appendChild(sep);
+  }
+
+  var span = document.createElement('span');
+  span.className = 'side-effect';
+  span.innerHTML = '<span style="color:' + data.color + '">■</span> ' + data[choice];
+  strip.appendChild(span);
+
+  setTimeout(function() {
+    span.classList.add('visible');
+  }, 50);
+}
+
+function updateStripVisibility(screenId) {
+  var strip = document.getElementById('side-effects-strip');
+  if (noStripScreens.indexOf(screenId) === -1 && state.sideEffectsRevealed.length > 0) {
+    strip.style.display = 'flex';
+    document.body.classList.add('has-strip');
+  } else {
+    strip.style.display = 'none';
+    document.body.classList.remove('has-strip');
+  }
+}
+
+function populateChallenge(targetScenario, previousScenario) {
+  var el = document.getElementById(targetScenario + '_challenge');
+  var prevChoice = state.choices[previousScenario];
+  if (el && prevChoice && challengeLines[targetScenario]) {
+    el.textContent = challengeLines[targetScenario][prevChoice];
+  }
+}
+
+function populatePrescriptionLabel() {
+  var container = document.getElementById('prescription-label');
+  var scenarios = ['s1', 's2', 's3', 's4'];
+  var html = '<h3>WARNING: Side Effects Observed</h3>';
+  for (var i = 0; i < scenarios.length; i++) {
+    var s = scenarios[i];
+    var choice = state.choices[s];
+    if (choice) {
+      var data = sideEffectData[s];
+      html += '<p class="prescription-item"><span style="color:' + data.color + '">■</span> ' + data.name + ': ' + data[choice] + '</p>';
+    }
+  }
+  html += '<p class="prescription-footer">Use care when prescribing goals.</p>';
+  container.innerHTML = html;
+}
+</script>
+</body>
+</html>

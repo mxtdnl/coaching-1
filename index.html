@@ -1,0 +1,136 @@
+<meta charset="utf-8">
+<title>Coaching 1</title>
+<style>
+:root {
+  --bg: #F2DFBE;
+  --bg-card: #FFFAF2;
+  --bg-deep: #E8D2A8;
+  --text: #2A1F18;
+  --text-muted: #6A5A48;
+  --border: #D8C8A8;
+  --char-1: #5C3A96;
+  --char-2: #B52838;
+  --char-3: #C85218;
+  --char-4: #D4A020;
+  --char-5: #7A5828;
+  --char-6: #B83068;
+  --char-7: #CC6830;
+  --char-8: #7E58A8;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  padding-inline: 16px;
+}
+
+#app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-block: 2rem 4rem;
+}
+
+h1 {
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.05;
+  margin-bottom: 0.5rem;
+}
+
+.lede {
+  color: var(--text-muted);
+  max-width: 640px;
+  margin-bottom: 2.5rem;
+  font-size: 0.95rem;
+}
+
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.activity-card {
+  display: block;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  padding: 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.activity-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(42,31,24,0.12);
+  border-color: var(--text);
+}
+
+.activity-card:active {
+  transform: translateY(0);
+}
+
+.card-eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.card-title {
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+  margin-bottom: 0.5rem;
+}
+
+.card-desc {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .activity-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  body { background: white; }
+  .activity-card { box-shadow: none; border: 1px solid #ccc; }
+}
+</style>
+
+<div id="app">
+  <h1>Coaching 1</h1>
+  <p class="lede">Workshop materials and interactive tools for Coaching 1: setting goals, and choosing the indicators that tell you whether you are on track.</p>
+
+  <div class="activity-grid">
+    <a class="activity-card" href="coaching-1-workshop-1.html" style="border-left: 6px solid var(--char-1)">
+      <div class="card-eyebrow" style="color: var(--char-1)">Workshop 1</div>
+      <div class="card-title">Goals</div>
+      <div class="card-desc">Exploring how we set goals and what can often go wrong.</div>
+    </a>
+    <a class="activity-card" href="2026-09-lagging-and-leading-indicators.html" style="border-left: 6px solid var(--char-4)">
+      <div class="card-eyebrow" style="color: var(--char-4)">Workshop 2 &middot; Slides</div>
+      <div class="card-title">Lagging and Leading Indicators</div>
+      <div class="card-desc">Projection deck on the difference between leading and lagging indicators and how to apply them to your own goal.</div>
+    </a>
+    <a class="activity-card" href="signal-tower.html" style="border-left: 6px solid var(--char-2)">
+      <div class="card-eyebrow" style="color: var(--char-2)">Workshop 2 &middot; Simulation</div>
+      <div class="card-title">Signal Tower</div>
+      <div class="card-desc">Pursue a goal for eight weeks with your real progress hidden in fog: choose leading and lagging indicators, set weekly targets, and see which windows told you the truth.</div>
+    </a>
+  </div>
+</div>
