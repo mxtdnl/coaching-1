@@ -3,7 +3,7 @@
 
      node tests/ripple.mjs
 
-   It reads ../microleadership-ripple.html, pulls out the model between the
+   It reads ../microleadership.html, pulls out the model between the
    MODEL START / MODEL END markers and evaluates it in a vm context, so the
    tests always run against the shipped file.
    ========================================================================== */
@@ -13,12 +13,12 @@ import { dirname, join } from 'node:path';
 import vm from 'node:vm';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const html = readFileSync(join(here, '..', 'microleadership-ripple.html'), 'utf8');
+const html = readFileSync(join(here, '..', 'microleadership.html'), 'utf8');
 const match = html.match(/\/\* MODEL START \*\/([\s\S]*?)\/\* MODEL END \*\//);
 if (!match) { console.error('could not find the MODEL START / MODEL END block'); process.exit(1); }
 
 const context = vm.createContext({ console });
-vm.runInContext(match[1] + '\n;globalThis.__RP = RP;', context, { filename: 'microleadership-ripple.html#model' });
+vm.runInContext(match[1] + '\n;globalThis.__RP = RP;', context, { filename: 'microleadership.html#model' });
 const RP = context.__RP;
 
 let passed = 0, failed = 0;
