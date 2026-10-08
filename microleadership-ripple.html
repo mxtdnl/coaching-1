@@ -1,0 +1,1574 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ripple: Micro-leadership</title>
+<style>
+:root {
+  --paper: #F3EEE3;
+  --card: #FBF8F1;
+  --ink: #16213A;
+  --ink-2: #4A4F5C;
+  --faint: #D9D1C1;
+  --riso: #F06A8C;
+  --you: #2A5DB0;
+  --ml: #0F8A6B;   --ml-ink: #0B6650;   --ml-tint: #E1F0E9;
+  --mm: #D0532E;   --mm-ink: #A63A1C;   --mm-tint: #F7E3DA;
+  --wait: #8C5BB8; --wait-ink: #6A3F94; --wait-tint: #EDE4F4;
+  --gg: #B07A00;   --gg-ink: #7A5400;   --gg-tint: #F4EAD2;
+  --none: #6B6B6B; --none-ink: #4F4F4F; --none-tint: #EAE7E1;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background-color: var(--paper);
+  background-image: radial-gradient(rgba(22, 33, 58, 0.07) 1px, transparent 1.2px);
+  background-size: 7px 7px;
+  color: var(--ink);
+  font: 16px/1.5 var(--sans);
+}
+
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px 56px; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.skip { position: absolute; left: -999px; top: 8px; background: var(--ink); color: var(--card); padding: 8px 12px; z-index: 10; }
+.skip:focus { left: 8px; }
+
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--you); outline-offset: 2px; }
+
+/* ---------- masthead ---------- */
+.mast {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 24px;
+  align-items: end;
+  padding: 28px 0 18px;
+  border-bottom: 3px solid var(--ink);
+}
+.kicker { font: 700 0.74rem/1.3 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; margin: 0 0 6px; color: var(--ink-2); }
+h1 {
+  margin: 0;
+  font-size: clamp(3.2rem, 13vw, 6.8rem);
+  line-height: 0.86;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  text-shadow: 5px 4px 0 var(--riso);
+}
+.intro { max-width: 46ch; margin: 14px 0 0; font-size: 1.05rem; }
+.tools { display: flex; gap: 8px; }
+.btn {
+  border: 2px solid var(--ink);
+  background: var(--card);
+  padding: 8px 14px;
+  min-height: 44px;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.82rem;
+}
+.btn:hover { background: #fff; }
+.btn.primary { background: var(--ink); color: var(--card); box-shadow: 4px 4px 0 var(--riso); }
+.btn.primary:hover { box-shadow: 6px 6px 0 var(--riso); }
+.btn.armed { background: var(--mm-ink); border-color: var(--mm-ink); color: #fff; }
+
+/* ---------- HUD ---------- */
+.hud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 26px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ink);
+  margin-bottom: 22px;
+  font-family: var(--mono);
+  font-size: 0.86rem;
+}
+.hud-item { display: flex; align-items: center; gap: 8px; }
+.hud-label { text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.7rem; color: var(--ink-2); }
+.hud-val { font-weight: 800; font-size: 1.15rem; }
+.days { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; }
+.days li { border: 1.5px solid var(--ink); padding: 2px 6px; font-size: 0.72rem; text-transform: uppercase; }
+.days li.past { background: var(--faint); }
+.days li[aria-current] { background: var(--ink); color: var(--card); }
+.score-wrap { position: relative; }
+.delta {
+  position: absolute; left: 100%; top: -6px; margin-left: 6px;
+  font-weight: 800; white-space: nowrap; pointer-events: none;
+  animation: floatUp 1.3s ease-out forwards;
+}
+.delta.up { color: var(--ml-ink); }
+.delta.down { color: var(--mm-ink); }
+@keyframes floatUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-16px); } }
+.minibar { width: 90px; height: 10px; border: 1.5px solid var(--ink); position: relative; background: var(--card); }
+.minibar span { position: absolute; left: 0; top: 0; bottom: 0; background: var(--you); transition: width 0.5s ease; }
+.pips { display: inline-flex; gap: 3px; }
+.pip-e { width: 12px; height: 12px; border: 1.5px solid var(--ink); background: var(--card); }
+.pip-e.on { background: var(--riso); }
+
+/* ---------- layout ---------- */
+.game { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 360px); gap: 28px; align-items: start; }
+.board { position: sticky; top: 12px; }
+@media (max-width: 860px) {
+  .game { grid-template-columns: 1fr; }
+  .board { position: static; }
+  .mast { grid-template-columns: 1fr; }
+}
+
+/* ---------- stage ---------- */
+.stage {
+  background: var(--card);
+  border: 2px solid var(--ink);
+  box-shadow: 8px 8px 0 var(--riso);
+  padding: clamp(18px, 4vw, 32px);
+  min-height: 420px;
+}
+.stage h2 { font-size: clamp(1.5rem, 4.4vw, 2.2rem); line-height: 1.1; margin: 0 0 12px; letter-spacing: -0.01em; }
+.stage h2:focus { outline: none; }
+.stage h3 { font: 800 0.8rem/1.3 var(--mono); text-transform: uppercase; letter-spacing: 0.1em; margin: 26px 0 10px; }
+.eyebrow { font: 700 0.74rem/1.3 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 10px; }
+.scene {
+  font-size: 1.12rem;
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border-left: 6px solid var(--ink);
+  background: var(--paper);
+}
+.small { font-size: 0.9rem; color: var(--ink-2); }
+.steps { counter-reset: s; list-style: none; padding: 0; margin: 0 0 8px; }
+.steps li { counter-increment: s; position: relative; padding: 0 0 12px 46px; }
+.steps li::before {
+  content: counter(s); position: absolute; left: 0; top: -2px;
+  width: 32px; height: 32px; display: grid; place-items: center;
+  background: var(--ink); color: var(--card); font: 800 1rem var(--mono);
+}
+.rules-list { margin: 0; padding-left: 20px; }
+.rules-list li { margin-bottom: 4px; }
+
+.choices { display: grid; gap: 10px; margin: 0 0 16px; }
+.choices.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 560px) { .choices.three { grid-template-columns: 1fr; } }
+.choice {
+  display: flex; align-items: flex-start; gap: 12px;
+  width: 100%; text-align: left;
+  background: var(--card); border: 2px solid var(--ink);
+  padding: 12px 14px; min-height: 48px; cursor: pointer;
+  transition: box-shadow 0.08s ease, background-color 0.08s ease;
+}
+.choice:hover:not([disabled]) { box-shadow: 4px 4px 0 var(--ink); background: #fff; }
+.choice[disabled] { cursor: default; color: var(--ink-2); border-color: #9A9488; }
+.choice.picked { border-width: 3px; border-color: var(--ink); color: var(--ink); box-shadow: inset 6px 0 0 var(--ink); }
+.choice .lbl { flex: 1; }
+kbd {
+  font: 700 0.75rem/1 var(--mono); border: 1.5px solid currentColor; padding: 4px 6px; flex: none; margin-top: 1px;
+}
+.cost { flex: none; font: 700 0.75rem/1.4 var(--mono); white-space: nowrap; text-align: right; }
+.cost .pips { margin-left: 4px; vertical-align: -1px; }
+.cost .pip-e { width: 9px; height: 9px; }
+.choice .tag { margin-top: 6px; display: inline-block; }
+.reveal { display: block; }
+
+.tag { font: 800 0.7rem/1 var(--mono); text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 6px; border: 1.5px solid currentColor; }
+.t-ml { color: var(--ml-ink); } .t-mm { color: var(--mm-ink); } .t-wait { color: var(--wait-ink); }
+.t-gg { color: var(--gg-ink); } .t-none { color: var(--none-ink); }
+.choice.picked.k-ml { background: var(--ml-tint); } .choice.picked.k-mm { background: var(--mm-tint); }
+.choice.picked.k-wait { background: var(--wait-tint); } .choice.picked.k-gg { background: var(--gg-tint); }
+.choice.picked.k-none { background: var(--none-tint); }
+
+.feedback { border: 2px solid var(--ink); padding: 14px 16px; margin: 0 0 16px; background: #fff; }
+.feedback p { margin: 0 0 8px; }
+.feedback p:last-child { margin-bottom: 0; }
+.verdict { font-weight: 800; font-size: 1.05rem; }
+.verdict.ok { color: var(--ml-ink); }
+.verdict.no { color: var(--mm-ink); }
+.fx { list-style: none; padding: 0; margin: 8px 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.fx li { font: 700 0.78rem/1 var(--mono); padding: 5px 7px; border: 1.5px solid var(--ink); background: var(--paper); }
+.fx li.up { border-color: var(--ml-ink); color: var(--ml-ink); }
+.fx li.down { border-color: var(--mm-ink); color: var(--mm-ink); }
+.why { color: var(--ink-2); font-size: 0.95rem; }
+.banner { border: 2px dashed var(--ink); padding: 10px 14px; margin: 0 0 16px; font-weight: 600; }
+.banner.good { border-color: var(--ml-ink); color: var(--ml-ink); }
+.alert { border: 2px solid var(--mm-ink); background: var(--mm-tint); padding: 12px 14px; margin: 0 0 16px; }
+.energy-line { display: flex; align-items: center; gap: 8px; font: 700 0.85rem var(--mono); margin: 0 0 12px; }
+.upcoming { font-size: 0.88rem; color: var(--ink-2); margin: 0 0 16px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+
+.report { list-style: none; padding: 0; margin: 0 0 8px; }
+.report li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px dashed var(--faint); }
+.report .amt { font: 800 0.95rem var(--mono); white-space: nowrap; }
+.lift { padding: 8px 12px; border-left: 4px solid var(--ml); background: var(--ml-tint); margin-bottom: 6px; }
+
+/* ---------- board ---------- */
+.board-card { background: var(--card); border: 2px solid var(--ink); padding: 14px; }
+.board h2 { font: 800 0.8rem/1.3 var(--mono); text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 6px; }
+.pond { width: 100%; height: auto; display: block; max-height: 300px; }
+.pond .ring { fill: none; stroke: var(--faint); stroke-width: 1.5; }
+.pond .tie { stroke: var(--ink); stroke-linecap: round; opacity: 0.8; transition: stroke-width 0.4s ease; }
+.pond .tie.frayed { stroke-dasharray: 4 5; opacity: 0.55; }
+.pond .node circle { fill: var(--card); stroke: var(--ink); stroke-width: 2.5; transition: fill 0.4s ease; }
+.pond .node text { font: 800 13px var(--sans); text-anchor: middle; fill: var(--ink); }
+.pond .node.leads circle { fill: var(--ml); stroke: var(--ink); }
+.pond .node.leads text.nm { fill: #fff; }
+.pond .node.you circle { fill: var(--you); }
+.pond .node.you text { fill: #fff; letter-spacing: 0.08em; }
+.pond .pip { fill: var(--card); stroke: var(--ink); stroke-width: 1.4; }
+.pond .pip.on { fill: var(--ink); }
+.pond .leadtag { font: 800 10px var(--mono); letter-spacing: 0.1em; fill: var(--ml-ink); text-anchor: middle; }
+.pond .rip { fill: none; stroke-width: 3; transform-box: fill-box; transform-origin: center; animation: rip 1s ease-out forwards; }
+.pond .rip.r-up { stroke: var(--ml); }
+.pond .rip.r-down { stroke: var(--mm); stroke-dasharray: 5 4; }
+.pond .rip.r-lift { stroke: var(--ml); stroke-dasharray: 2 3; }
+@keyframes rip { from { transform: scale(0.9); opacity: 0.95; } to { transform: scale(2.1); opacity: 0; } }
+
+.meter-row { display: flex; justify-content: space-between; font: 700 0.8rem var(--mono); margin: 12px 0 4px; }
+.meter { position: relative; height: 18px; border: 2px solid var(--ink); background: var(--paper); }
+.meter .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--you); transition: width 0.6s ease; }
+.meter .goal { position: absolute; top: -6px; bottom: -6px; width: 0; border-left: 3px solid var(--ink); }
+.meter-note { font-size: 0.78rem; color: var(--ink-2); margin: 4px 0 0; }
+
+.team { list-style: none; padding: 0; margin: 12px 0 0; }
+.team li { display: grid; grid-template-columns: 1fr auto; gap: 0 10px; padding: 8px 0; border-top: 1px solid var(--faint); }
+.team .nm { font-weight: 800; }
+.team .role { font-size: 0.8rem; color: var(--ink-2); grid-column: 1; }
+.team .tr { font: 700 0.78rem var(--mono); text-align: right; grid-row: 1 / span 2; grid-column: 2; align-self: center; }
+.team .badge { font: 800 0.66rem var(--mono); background: var(--ml-ink); color: #fff; padding: 2px 5px; margin-left: 6px; letter-spacing: 0.06em; vertical-align: 1px; }
+
+/* ---------- end screen ---------- */
+.result { display: grid; grid-template-columns: auto 1fr; gap: 6px 20px; align-items: center; margin: 4px 0 18px; }
+.bigscore { font: 900 clamp(2.6rem, 9vw, 4.2rem)/1 var(--mono); letter-spacing: -0.04em; }
+.grade { font: 800 1.1rem var(--mono); text-transform: uppercase; letter-spacing: 0.06em; }
+.pb { font-size: 0.9rem; color: var(--ink-2); }
+.breakdown { width: 100%; border-collapse: collapse; margin: 0 0 8px; font-size: 0.95rem; }
+.breakdown th, .breakdown td { text-align: left; padding: 7px 4px; border-bottom: 1px dashed var(--faint); }
+.breakdown td.n { text-align: right; font: 800 0.95rem var(--mono); white-space: nowrap; }
+.breakdown tr.total td { border-top: 2px solid var(--ink); border-bottom: none; font-weight: 800; }
+.debrief p { margin: 0 0 10px; }
+.map { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.map li { border: 2px solid var(--ink); padding: 10px 12px; background: var(--paper); }
+.map b { display: block; font-family: var(--mono); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px; }
+
+.chart-wrap { position: relative; }
+.legend { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 0; margin: 0 0 6px; font-size: 0.85rem; }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.chart { width: 100%; height: auto; display: block; overflow: visible; }
+.chart .grid { stroke: var(--faint); stroke-width: 1; }
+.chart .axis { font: 11px var(--mono); fill: var(--ink-2); }
+.chart .goal { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 6 4; }
+.chart .goal-lbl { font: 700 11px var(--mono); fill: var(--ink); }
+.chart .end-lbl { font: 700 12px var(--sans); fill: var(--ink); }
+.chart .hit { fill: transparent; cursor: crosshair; }
+.chart .hit:focus { outline: none; }
+.chart .hit:focus-visible { fill: rgba(42, 93, 176, 0.08); }
+.chart .cross { stroke: var(--ink-2); stroke-width: 1; }
+.tip {
+  position: absolute; pointer-events: none; background: var(--ink); color: var(--card);
+  font: 12px/1.5 var(--mono); padding: 8px 10px; min-width: 170px; z-index: 2;
+}
+.tip strong { display: block; text-transform: uppercase; letter-spacing: 0.08em; }
+details { margin: 8px 0; }
+summary { cursor: pointer; font-weight: 700; }
+.datatable { border-collapse: collapse; font-size: 0.88rem; margin-top: 8px; width: 100%; }
+.datatable th, .datatable td { border: 1px solid var(--faint); padding: 4px 6px; text-align: right; }
+.datatable th:first-child, .datatable td:first-child { text-align: left; }
+.log { padding-left: 20px; font-size: 0.92rem; }
+.log li { margin-bottom: 4px; }
+
+.ledger { border-top: 3px solid var(--ink); margin-top: 28px; padding-top: 6px; }
+.field { display: grid; gap: 4px; margin-bottom: 12px; }
+.field label { font-weight: 700; font-size: 0.92rem; }
+.field select, .field textarea {
+  font: inherit; color: var(--ink); background: #fff; border: 2px solid var(--ink); padding: 8px 10px; border-radius: 0; width: 100%;
+}
+.ledger-list { padding-left: 20px; }
+.ledger-list li { margin-bottom: 8px; }
+
+/* ---------- rules dialog ---------- */
+dialog {
+  border: 3px solid var(--ink); background: var(--card); color: var(--ink);
+  max-width: 640px; width: calc(100% - 32px); padding: 22px 24px; box-shadow: 10px 10px 0 var(--riso);
+}
+dialog::backdrop { background: rgba(22, 33, 58, 0.55); }
+dialog h2 { margin: 0 0 8px; font-size: 1.6rem; }
+dialog h3 { font: 800 0.8rem/1.3 var(--mono); text-transform: uppercase; letter-spacing: 0.1em; margin: 18px 0 6px; }
+.ctable { border-collapse: collapse; font: 0.85rem var(--mono); }
+.ctable th, .ctable td { border: 1.5px solid var(--ink); padding: 4px 9px; text-align: center; }
+
+footer { margin-top: 28px; font-size: 0.82rem; color: var(--ink-2); border-top: 1px solid var(--ink); padding-top: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+@media print {
+  body { background: #fff; }
+  .tools, .hud, .board, .actions, .ledger form { display: none; }
+  .stage { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#stage">Skip to the game</a>
+<div class="wrap">
+  <header class="mast">
+    <div>
+      <p class="kicker">Changemaking &middot; Micro-leadership after Alex Budak</p>
+      <h1>Ripple</h1>
+      <p class="intro">Five days, one group project and no title: lead your team through a week of small moments, and find out how far small, deliberate acts can spread.</p>
+    </div>
+    <div class="tools">
+      <button type="button" class="btn" id="rulesBtn" aria-haspopup="dialog">Rules</button>
+      <button type="button" class="btn" id="resetBtn">Reset</button>
+    </div>
+  </header>
+
+  <div class="hud" aria-label="Game status">
+    <div class="hud-item"><span class="hud-label" id="dayLbl">Day</span><ol class="days" id="days" aria-labelledby="dayLbl"></ol></div>
+    <div class="hud-item"><span class="hud-label">Score</span><span class="score-wrap"><span class="hud-val" id="score">0</span></span></div>
+    <div class="hud-item"><span class="hud-label">Readiness</span><span class="hud-val" id="hudProg">0</span><span class="minibar" aria-hidden="true"><span id="hudBar" style="width:0"></span></span></div>
+    <div class="hud-item"><span class="hud-label">Energy</span><span class="pips" id="hudEnergy" aria-hidden="true"></span><span class="sr-only" id="hudEnergyTxt"></span></div>
+    <div class="hud-item"><span class="hud-label">Best</span><span class="hud-val" id="best">&ndash;</span></div>
+  </div>
+
+  <main class="game">
+    <section class="stage" id="stage" aria-label="Play area"></section>
+
+    <aside class="board" aria-labelledby="boardH">
+      <div class="board-card">
+        <h2 id="boardH">Your team</h2>
+        <svg class="pond" id="pond" viewBox="0 0 400 300" role="img" aria-labelledby="pondTitle"><title id="pondTitle">Team map</title></svg>
+        <div class="meter-row"><span>Pitch readiness</span><span id="progTxt">0 / 100</span></div>
+        <div class="meter" id="progMeter" role="meter" aria-label="Pitch readiness" aria-valuemin="0" aria-valuemax="150" aria-valuenow="0">
+          <div class="fill" id="progFill" style="width:0"></div>
+          <div class="goal" style="left:66.67%"></div>
+        </div>
+        <p class="meter-note">The line marks 100: enough to be funded.</p>
+        <ul class="team" id="teamList"></ul>
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    Grounded in Alex Budak, &ldquo;Microleadership: How to be a Leader When You Are Not the Leader&rdquo; (alexbudak.com), the basis of his TEDx talk &ldquo;You don't have to be a CEO to be a leader&rdquo;. The team, the scheme and every scene are fictional.
+  </footer>
+</div>
+
+<div id="live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+<dialog id="rulesDlg" aria-labelledby="rulesH">
+  <h2 id="rulesH">Rules</h2>
+  <p>Get the pitch to <strong>100 readiness</strong> by Friday at 4pm, and build a team that leads itself. You have no title. Kit, the coordinator, has one.</p>
+  <h3>Each day</h3>
+  <ol class="rules-list">
+    <li><strong>Spot it.</strong> Three everyday scenes. Call each one micro-leadership, micromanagement, or neither. Get all three right and you see more chances to act: <strong>+1 energy</strong> today.</li>
+    <li><strong>Your moves.</strong> You get <strong>3 energy</strong> a day. Each moment offers responses with an energy cost; what they do is revealed after you choose. You cannot afford everything, so choose where to lead. Unspent energy becomes solo work: +2 readiness each.</li>
+    <li><strong>End of day.</strong> Each teammate adds readiness according to the trust they had <em>that morning</em>, so trust you build today pays from tomorrow. Any teammate at trust 4 or more starts micro-leading: each one lifts their least-trusted colleague by 1.</li>
+  </ol>
+  <h3>Trust and output</h3>
+  <table class="ctable">
+    <tr><th scope="row">Trust</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+    <tr><th scope="row">Readiness / day</th><td>0</td><td>1</td><td>2</td><td>3</td><td>5</td><td>7</td></tr>
+  </table>
+  <h3>Scoring</h3>
+  <ul class="rules-list">
+    <li>+10 for each scene you classify correctly (15 scenes).</li>
+    <li>+1 per readiness point gained, &minus;1 per point lost.</li>
+    <li>+5 per trust point a teammate gains, &minus;5 per point lost, ripples included.</li>
+    <li>Friday: +50 if readiness reaches 100, and +10 for every teammate who is micro-leading.</li>
+  </ul>
+  <h3>Controls</h3>
+  <p>Click or tap, or press <kbd>1</kbd>&ndash;<kbd>4</kbd> to pick an option. Tab and Enter work everywhere.</p>
+  <div class="actions"><button type="button" class="btn primary" id="rulesClose">Close</button></div>
+</dialog>
+
+<script>
+/* MODEL START */
+var RP = (function () {
+  "use strict";
+
+  var TARGET = 100;          // pitch readiness needed to be funded
+  var ENERGY_BASE = 3;       // energy per day
+  var LEADS_AT = 4;          // trust at which a teammate starts micro-leading
+  var CONTRIB = [0, 1, 2, 3, 5, 7]; // readiness a teammate adds per day, by trust 0-5
+  var PTS = { spot: 10, trust: 5, prog: 1, solo: 2, ready: 50, leader: 10 };
+  var MAX_SCORE = 456;       // best possible score; tests/ripple.mjs re-derives it by beam search
+
+  var TEAM = [
+    { id: "kit", name: "Kit", role: "Appointed coordinator. Overloaded.", start: 2,
+      lift: "Kit asked {x} for their view before deciding anything." },
+    { id: "sam", name: "Sam", role: "Quiet. Full of ideas.", start: 1,
+      lift: "Sam passed the tutor's praise on to {x}, by name." },
+    { id: "ade", name: "Ade", role: "Does the unseen work.", start: 2,
+      lift: "Ade stayed late to help {x} finish and tidy up." },
+    { id: "jordan", name: "Jordan", role: "Sharp when stressed.", start: 1,
+      lift: "Jordan gave {x} quick, kind feedback on a draft." }
+  ];
+
+  var TYPES = {
+    ml: { label: "Micro-leadership",
+      why: "A small, intentional act that builds trust and gives someone room to do their best work." },
+    mm: { label: "Micromanagement",
+      why: "You bought visible progress today by taking control. Trust drops, and with it what people do when you are not watching." },
+    wait: { label: "Waiting for permission",
+      why: "Free today. But people and problems do not stand still while you wait for someone with a title to act." },
+    gg: { label: "Grand gesture",
+      why: "Big, costly and visible, and it changes very little about how people behave on an ordinary Tuesday." },
+    none: { label: "Not leadership",
+      why: "Something happened, but nobody was helped to do better work." }
+  };
+
+  // Spot items: answer is "ml", "mm" or "none".
+  var DAYS = [
+    { name: "Monday", title: "Kick-off",
+      setup: "Your team of five has until Friday at 4pm to pitch a campus refill-station scheme to the Students' Union changemaker fund. Kit is the appointed coordinator. You have no title at all.",
+      spots: [
+        { text: "Before Monday's lecture, a student you have never met rearranges the chairs into groups so the workshop can start on time.", answer: "ml",
+          why: "Arriving early to help set up is one of Alex Budak's own examples. No title, no audience, real effect." },
+        { text: "Kit asks to be copied into every email 'just so nothing slips through'.", answer: "mm",
+          why: "Control that comes from not trusting people to run their own work. It slows everything down." },
+        { text: "A visiting speaker tells the cohort they are a leader because they have run three companies.", answer: "none",
+          why: "That is a position, not an act. Budak's point is that we often conflate acts of leadership with positions of leadership." }
+      ],
+      moments: [
+        { head: "Sam's silence",
+          text: "Kick-off meeting, minute 40. Sam has not said a word. Kit is about to wrap up.",
+          options: [
+            { label: "Ask: 'Sam, what do you think we're missing?'", type: "ml", cost: 1, fx: { sam: 2, prog: 1 },
+              says: "Sam pauses, then suggests surveying the campus cafés first. It is the best idea of the meeting." },
+            { label: "Ask Kit to give Sam the minutes, so Sam is at least doing something", type: "mm", cost: 1, fx: { sam: -1, prog: 3 },
+              says: "Sam takes the minutes. Sam does not speak again." },
+            { label: "Say nothing. Kit is chairing; it's their call.", type: "wait", cost: 0, fx: {},
+              says: "The meeting ends on time. Whatever Sam was thinking leaves with them." },
+            { label: "Propose a team-building away day next month", type: "gg", cost: 3, fx: { prog: 2 },
+              says: "Everyone says 'love that'. Nobody puts it in a calendar. Sam is still quiet." }
+          ] },
+        { head: "The 11pm task list",
+          text: "11pm. Kit posts a 14-item task list and asks for status updates 'by 8am'. Jordan replies 'ok'. No full stop. No emoji.",
+          options: [
+            { label: "Message Jordan privately: 'That list stressed me out too. Want to split one?'", type: "ml", cost: 1, fx: { jordan: 2, prog: 1 },
+              says: "Jordan replies with a relieved 'yes please'. Two tasks become one shared one." },
+            { label: "Reply-all with a colour-coded tracker everyone must update twice a day", type: "mm", cost: 2, fx: { prog: 6, jordan: -1, sam: -1 },
+              says: "The tracker is beautiful. Updating it becomes the main task. Jordan and Sam fill it in at 7:59am." },
+            { label: "Mute the chat until morning", type: "wait", cost: 0, fx: { jordan: -1 },
+              says: "You sleep well. Jordan does not." }
+          ] },
+        { head: "The lost room",
+          text: "The Wednesday room booking has failed: a system glitch, nobody's fault. Kit is already juggling everything.",
+          options: [
+            { label: "Rebook a room and tell Kit: 'Sorted. I should have double-checked it, so that one's on me.'", type: "ml", cost: 2, fx: { kit: 2, prog: 2 },
+              says: "Accepting responsibility when it wasn't your fault. Kit's shoulders drop about two centimetres." },
+            { label: "Forward the error to Kit: 'FYI, you'll want to sort this.'", type: "wait", cost: 0, fx: { kit: -1 },
+              says: "Technically helpful. Kit adds item 15 to the list." },
+            { label: "Escalate it to the module leader so there's a record", type: "none", cost: 1, fx: { kit: -1, prog: 1 },
+              says: "The module leader replies 'please sort this among yourselves'. Kit wonders why it went over their head." }
+          ] }
+      ] },
+    { name: "Tuesday", title: "Research",
+      setup: "Research day. The team is splitting up to gather evidence, which means more happens when you are not in the room.",
+      spots: [
+        { text: "After a seminar, Ade posts in the group chat thanking the two people who found the dataset, by name.", answer: "ml",
+          why: "Sharing praise with the people who did the work. Specific, public, and it costs nothing." },
+        { text: "A society president rewrites a first-year's poster without asking, because the font was 'off-brand'.", answer: "mm",
+          why: "Fixing someone's work over their head says 'I don't trust you'. The poster improves; the first-year stops volunteering." },
+        { text: "The shared drive is a mess. Everyone notices. Everyone assumes the module leader will sort it out.", answer: "none",
+          why: "Waiting for someone with a title to act. Budak's challenge is to stop waiting to be told you are the leader." }
+      ],
+      moments: [
+        { head: "Misplaced praise",
+          text: "In the seminar, the tutor praises you for 'the excellent data work'. Ade spent all of Sunday cleaning that data.",
+          options: [
+            { label: "'That was Ade. They cleaned every row.'", type: "ml", cost: 1, fx: { ade: 2 },
+              says: "The tutor asks Ade how they did it. Ade explains, and two other groups ask for the method." },
+            { label: "Say thanks; you'll mention Ade some other time", type: "wait", cost: 0, fx: { ade: -1 },
+              says: "Some other time does not arrive. Ade notices." },
+            { label: "Ask Ade to send you the raw file so you can re-check every row", type: "mm", cost: 2, fx: { prog: 5, ade: -1 },
+              says: "You find one typo. Ade finds out you checked all 2,000 rows behind their back." }
+          ] },
+        { head: "The 80% claim",
+          text: "Group call. Everyone has agreed the headline: 'refill stations cut plastic waste by 80%'. You cannot find where the 80% came from.",
+          options: [
+            { label: "Ask the question nobody is asking: 'Where's the 80% from?'", type: "ml", cost: 1, fx: { prog: 1, flag: "claimChecked" },
+              says: "Silence. Then Ade admits it came from a blog post about a different country. The team agrees to find a real figure." },
+            { label: "Go along with it. Four people can't all be wrong.", type: "wait", cost: 0, fx: {},
+              says: "Four people can, in fact, all be wrong. Nothing happens. Yet." },
+            { label: "Quietly rewrite the whole evidence section yourself overnight", type: "mm", cost: 2, fx: { prog: 6, ade: -1, kit: -1, flag: "claimChecked" },
+              says: "The figure is fixed. Ade and Kit discover their sections rewritten with no explanation." }
+          ] },
+        { head: "Jordan snaps",
+          text: "Jordan snaps at Sam in the group chat: 'Can you just do your bit properly?'",
+          options: [
+            { label: "Reply to Jordan with kindness: 'Sounds like a rough day. What's blocking you?'", type: "ml", cost: 1, fx: { jordan: 1, sam: 1 },
+              says: "Responding with kindness to anger. Twenty minutes later Jordan apologises to Sam, unprompted." },
+            { label: "Post the team's 'respectful communication' rules and ask everyone to re-read them", type: "mm", cost: 1, fx: { jordan: -1, prog: 1 },
+              says: "Everyone reacts with a thumbs-up. Jordan feels told off in public." },
+            { label: "Leave it. Kit's the coordinator.", type: "wait", cost: 0, fx: { sam: -1 },
+              says: "Kit is in a lecture. Sam reads the message eleven times." }
+          ] },
+        { head: "Three versions of the plan",
+          text: "The group chat now holds three versions of 'the plan'. Nobody knows which one is current.",
+          options: [
+            { label: "Pin a short summary of what's agreed and ask 'What have I missed?'", type: "ml", cost: 1, fx: { prog: 3, kit: 1 },
+              says: "Two corrections arrive within minutes. Now there is one plan, and everyone helped write it." },
+            { label: "Announce that every change must now go through you", type: "mm", cost: 1, fx: { prog: 4, kit: -1 },
+              says: "There is one plan. It is yours. Nobody else touches it." },
+            { label: "Wait for Kit to sort it out", type: "wait", cost: 0, fx: { prog: -2 },
+              says: "Sam works from version one. Jordan works from version three. Nobody works from version two." }
+          ] }
+      ] },
+    { name: "Wednesday", title: "Build the deck",
+      setup: "Deck-building day. Small frictions start to cost real time.",
+      spots: [
+        { text: "When a flatmate storms in furious about the bins, another flatmate answers calmly and kindly instead of firing back.", answer: "ml",
+          why: "Responding with kindness when someone greets you with anger or fear: another of Budak's examples." },
+        { text: "A team lead insists on approving every slide before anyone else may edit the deck.", answer: "mm",
+          why: "A bottleneck by design. Work waits for one person, and everyone else learns to stop trying." },
+        { text: "Everyone is happy with a vote, but one student says no and explains the risk they can see.", answer: "ml",
+          why: "Being willing to say no when everyone else is saying yes. Uncomfortable, small, and often decisive." }
+      ],
+      moments: [
+        { head: "Rehearsal set-up",
+          text: "Rehearsal in the library pod at 2pm. Someone has to sort the projector, the cables and the chairs.",
+          options: [
+            { label: "Turn up at 1:30 and set up, so everyone can start on time", type: "ml", cost: 2, fx: { prog: 4, kit: 1 },
+              says: "At 2:00 the slides are on screen. Kit, arriving at 1:58 braced for chaos, visibly relaxes." },
+            { label: "Message at 1:55: 'Who's doing the projector?'", type: "wait", cost: 0, fx: { prog: -3 },
+              says: "Nobody was doing the projector. Twenty minutes go on finding an adaptor." },
+            { label: "Send everyone a set-up checklist and say you'll inspect it at 1:50", type: "mm", cost: 1, fx: { prog: 4, jordan: -1 },
+              says: "The chairs are perfect. Jordan and Sam feel like they are on probation." }
+          ] },
+        { head: "Sam's cluttered slide",
+          text: "Sam's slide is cluttered, but it holds the best idea in the deck: a refill loyalty stamp.",
+          options: [
+            { label: "Quick, kind, specific: 'The stamp is the hook. Could the slide be one sentence and a picture?'", type: "ml", cost: 1, fx: { sam: 2, prog: 2 },
+              says: "Sam's next version is better than anything you would have made. It took you one message." },
+            { label: "Rebuild Sam's slide yourself in your own template", type: "mm", cost: 2, fx: { prog: 6, sam: -2 },
+              says: "It looks sharp. Sam does not offer another idea this week." },
+            { label: "Thumbs-up emoji. Say nothing.", type: "wait", cost: 0, fx: { prog: -1 },
+              says: "The clutter survives into the final deck." }
+          ] },
+        { head: "Kit at 3am",
+          text: "Kit is coordinating, presenting and building the budget, and has started replying to messages at 3am.",
+          options: [
+            { label: "Offer to take the budget slide, and ask Kit what 'done' looks like", type: "ml", cost: 2, fx: { kit: 2, prog: 3 },
+              says: "Kit sends you the brief in four lines and goes to bed before midnight." },
+            { label: "Ask Kit to send you every draft first so you can quality-check it", type: "mm", cost: 1, fx: { kit: -1, prog: 2 },
+              says: "Kit now has one more person to report to." },
+            { label: "Wait for Kit to ask for help", type: "wait", cost: 0, fx: { kit: -1 },
+              says: "Overloaded people rarely ask. Kit doesn't." },
+            { label: "Propose rebranding the project with a new name and logo to lift morale", type: "gg", cost: 3, fx: { prog: 2 },
+              says: "Forty messages about fonts. Kit's workload: unchanged." }
+          ] },
+        { head: "'Not a leader type'",
+          text: "Jordan says they are 'not really a leader type' and asks you to present their section instead.",
+          options: [
+            { label: "'You know this section best. Want to rehearse it with me first?'", type: "ml", cost: 1, fx: { jordan: 2 },
+              says: "Jordan runs it twice and keeps it. Often the only real constraint is a self-limiting belief about who gets to lead." },
+            { label: "Write Jordan a script to learn word for word", type: "mm", cost: 1, fx: { jordan: -1, prog: 3 },
+              says: "Jordan learns it. Jordan also learns that you don't trust them with their own words." },
+            { label: "'Sure, I'll do it.'", type: "none", cost: 0, fx: { prog: 2, jordan: -1 },
+              says: "You present it fine. Jordan is relieved, and quietly concludes you agree they aren't a leader type." }
+          ] }
+      ] },
+    { name: "Thursday", title: "Crunch",
+      setup: "The deck is due tomorrow. Pressure makes control look tempting.",
+      event: { unless: "claimChecked", prog: -15,
+        text: "The SU's sustainability officer emails: the 80% figure is wrong. The evidence slide has to be rebuilt from scratch." },
+      spots: [
+        { text: "A teammate says 'that's on me' when the venue cancels, even though the mistake was the venue's.", answer: "ml",
+          why: "Accepting responsibility even when it wasn't your fault. It ends the blame hunt and gets everyone back to work." },
+        { text: "A manager watches the shared document live and comments on every typo as it is being typed.", answer: "mm",
+          why: "Surveillance dressed up as support. People write slower and more cautiously with someone watching every keystroke." },
+        { text: "A student plans a dramatic all-night 'rescue sprint', then misses the next two meetings recovering.", answer: "none",
+          why: "A grand gesture: big, visible, costly and hard to repeat. Micro-leadership is small and sustainable." }
+      ],
+      moments: [
+        { head: "Two missing slides",
+          text: "9pm. The deck is due tomorrow and two slides are still missing. Everyone is online.",
+          options: [
+            { label: "Ask 'Who wants which slide? I'll take whichever's left.'", type: "ml", cost: 1, fx: { prog: 3, ade: 1, sam: 1 },
+              says: "Ade and Sam claim one each within a minute. You get the leftovers, which is the point." },
+            { label: "Assign slides by name with a 10pm deadline and screenshots every half hour", type: "mm", cost: 2, fx: { prog: 8, ade: -1, sam: -1, jordan: -1 },
+              says: "The slides arrive on time. So does a lot of quiet resentment." },
+            { label: "Pull an all-nighter and write both slides yourself", type: "gg", cost: 3, fx: { prog: 10, tired: true },
+              says: "Done by 4am. Heroic. You will start tomorrow with one less energy." },
+            { label: "Leave it; someone will pick them up", type: "wait", cost: 0, fx: { prog: -3 },
+              says: "Someone does, at 1am, badly." }
+          ] },
+        { head: "Cut the stamp?",
+          text: "Final read-through. Jordan suggests cutting the loyalty stamp 'because it's risky'. Everyone nods.",
+          options: [
+            { label: "Be the one to say no, and explain why the stamp is the hook", type: "ml", cost: 1, fx: { prog: 4, sam: 1 },
+              says: "Saying no when everyone else says yes. After a pause, Jordan agrees and suggests how to answer the risk question." },
+            { label: "Nod along. Tonight isn't the night for debate.", type: "wait", cost: 0, fx: { prog: -4, sam: -1 },
+              says: "The stamp goes. So does the most memorable part of the pitch." },
+            { label: "'It's staying in. End of discussion.'", type: "mm", cost: 1, fx: { prog: 3, jordan: -2 },
+              says: "The stamp stays. Jordan stops raising risks, including the useful ones." }
+          ] },
+        { head: "Ade's laptop",
+          text: "Ade mentions, quietly, that their laptop died and two hours of work went with it.",
+          options: [
+            { label: "'That's grim. What can I take off your plate?'", type: "ml", cost: 1, fx: { ade: 2 },
+              says: "Ade hands you one chart. They redo the rest faster than you'd expect." },
+            { label: "Ask Ade to back up every 30 minutes and confirm each time in the chat", type: "mm", cost: 1, fx: { ade: -1, prog: 2 },
+              says: "Ade confirms. Every 30 minutes. Until 2am." },
+            { label: "Sympathetic emoji, back to your own slide", type: "wait", cost: 0, fx: { ade: -1 },
+              says: "Ade sees the emoji. Ade rebuilds alone." }
+          ] },
+        { head: "The deadline rumour",
+          text: "A rumour in the chat says the deadline has been extended. Nobody checks.",
+          options: [
+            { label: "Email the SU to check, then share the answer with everyone", type: "ml", cost: 1, fx: { prog: 3, kit: 1 },
+              says: "It hasn't been extended. Two people who had started to relax get back to work." },
+            { label: "Assume it's true and slow down", type: "wait", cost: 0, fx: { prog: -4 },
+              says: "It isn't true." },
+            { label: "Tell everyone to ignore rumours and only take updates from you", type: "mm", cost: 1, fx: { prog: 2, kit: -1, jordan: -1 },
+              says: "The rumour stops. So does Kit's sense of being the coordinator." }
+          ] }
+      ] },
+    { name: "Friday", title: "Pitch day",
+      setup: "Pitch at 4pm. Last chances to lead, and the team you have built is the team that walks in.",
+      spots: [
+        { text: "In the final rehearsal, someone asks the question nobody else will: 'What do we say if the panel asks about cost?'", answer: "ml",
+          why: "Asking the questions no one else will ask. Better in rehearsal than in front of the panel." },
+        { text: "A coordinator gives themselves every speaking part 'to keep it consistent'.", answer: "mm",
+          why: "Consistency is real, but taking every part away from the people who did the work stifles them." },
+        { text: "A teammate gives a peer quick, specific, kind feedback on their opening line.", answer: "ml",
+          why: "Quick, thoughtful, kind feedback. Thirty seconds that change the first impression." }
+      ],
+      moments: [
+        { head: "Who presents?",
+          text: "Kit announces they will present every slide themselves 'to keep it consistent'.",
+          options: [
+            { label: "Suggest each person presents what they built, and offer to run the rehearsal clock", type: "ml", cost: 1, fx: { sam: 1, ade: 1, jordan: 1, prog: 2 },
+              says: "Kit agrees with visible relief. Everyone rehearses their own part; you keep time." },
+            { label: "Agree, and send Kit a timed script to read word for word", type: "mm", cost: 1, fx: { kit: -1, prog: 3 },
+              says: "Kit is now reading your words, in your rhythm, about everyone else's work." },
+            { label: "'Fine by me.'", type: "wait", cost: 0, fx: { sam: -1, jordan: -1 },
+              says: "Sam and Jordan, who built half the deck, will watch from the side." }
+          ] },
+        { head: "Shaking hands",
+          text: "Ten minutes before the pitch, Jordan's hands are shaking.",
+          options: [
+            { label: "Take Jordan for a walk round the block and run the opening line once", type: "ml", cost: 2, fx: { jordan: 1, prog: 4 },
+              says: "Jordan comes back steadier, and opens the pitch." },
+            { label: "Tell Jordan exactly how to breathe and to stop looking at their notes", type: "mm", cost: 1, fx: { jordan: -1, prog: 1 },
+              says: "Jordan now has two more things to get wrong." },
+            { label: "Leave Jordan to it; everyone gets nervous", type: "wait", cost: 0, fx: { prog: -3 },
+              says: "Jordan rushes the opening and the panel looks at their notes." }
+          ] },
+        { head: "'Who's leading this?'",
+          text: "At the final rehearsal, the SU's changemaker officer drops in: 'So, who's leading this?' Everyone looks at Kit.",
+          options: [
+            { label: "'Honestly? All of us. Sam had the hook, Ade the data, Jordan the risks, and Kit held it together.'", type: "ml", cost: 1, fx: { kit: 1, sam: 1, ade: 1, jordan: 1 },
+              says: "A leader without being the leader. Four people stand a little taller walking into the pitch." },
+            { label: "'Kit's the coordinator.'", type: "wait", cost: 0, fx: {},
+              says: "True, and incomplete." },
+            { label: "'I did quite a lot of it, to be fair.'", type: "none", cost: 0, fx: { kit: -1, sam: -1, ade: -1, jordan: -1 },
+              says: "It lands about as well as you'd expect." }
+          ] }
+      ] }
+  ];
+
+  function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+
+  function newState() {
+    var s = { day: 0, prog: 0, score: 0, energy: 0, tired: false, flags: {}, trust: {},
+      spotsRight: 0, spotsTotal: 0, dayPerfect: [], counts: { ml: 0, mm: 0, wait: 0, gg: 0, none: 0 },
+      progByDay: [0], lifts: 0, done: false };
+    TEAM.forEach(function (t) { s.trust[t.id] = t.start; });
+    return s;
+  }
+
+  function clone(s) { return JSON.parse(JSON.stringify(s)); }
+
+  function applyFx(s, fx) {
+    var d = { prog: 0, trust: {}, score: 0 };
+    if (fx.prog) {
+      var p = Math.max(0, s.prog + fx.prog);
+      d.prog = p - s.prog; s.prog = p;
+      d.score += d.prog * PTS.prog;
+    }
+    TEAM.forEach(function (t) {
+      if (!fx[t.id]) return;
+      var old = s.trust[t.id];
+      s.trust[t.id] = clamp(old + fx[t.id], 0, 5);
+      var diff = s.trust[t.id] - old;
+      if (diff) { d.trust[t.id] = diff; d.score += diff * PTS.trust; }
+    });
+    if (fx.flag) s.flags[fx.flag] = true;
+    if (fx.tired) s.tired = true;
+    s.score += d.score;
+    return d;
+  }
+
+  // Start of a day: set energy, fire any start-of-day event.
+  function beginDay(s) {
+    var day = DAYS[s.day];
+    s.energy = ENERGY_BASE - (s.tired ? 1 : 0);
+    var out = { tired: s.tired, event: null };
+    s.tired = false;
+    s.morning = {};
+    TEAM.forEach(function (t) { s.morning[t.id] = s.trust[t.id]; });
+    if (day.event && !s.flags[day.event.unless]) {
+      out.event = { text: day.event.text, d: applyFx(s, { prog: day.event.prog }) };
+    }
+    return out;
+  }
+
+  function answerSpot(s, spot, answer) {
+    var ok = answer === spot.answer;
+    s.spotsTotal++;
+    if (ok) { s.spotsRight++; s.score += PTS.spot; }
+    return ok;
+  }
+
+  // After the three spots: a perfect day earns one extra energy.
+  function closeSpots(s, rightToday) {
+    var perfect = rightToday === DAYS[s.day].spots.length;
+    s.dayPerfect[s.day] = perfect;
+    if (perfect) s.energy += 1;
+    return perfect;
+  }
+
+  function canAfford(s, opt) { return opt.cost <= s.energy; }
+
+  function choose(s, opt) {
+    if (!canAfford(s, opt)) throw new Error("not enough energy");
+    s.energy -= opt.cost;
+    s.counts[opt.type]++;
+    return applyFx(s, opt.fx);
+  }
+
+  function contribution(trust) { return CONTRIB[trust]; }
+
+  function leaders(s) { return TEAM.filter(function (t) { return s.trust[t.id] >= LEADS_AT; }); }
+
+  // End of a day: leftover energy becomes solo work, teammates contribute by
+  // the trust they started the day with (trust takes a day to show), then every teammate at LEADS_AT+ lifts the lowest-trust colleague.
+  function endDay(s) {
+    var r = { solo: 0, contribs: [], lifts: [], score: 0 };
+    var before = s.score;
+    if (s.energy > 0) {
+      r.solo = applyFx(s, { prog: s.energy * PTS.solo }).prog;
+      s.energy = 0;
+    }
+    TEAM.forEach(function (t) {
+      var c = contribution(s.morning[t.id]);
+      r.contribs.push({ id: t.id, amount: c });
+      applyFx(s, { prog: c });
+    });
+    leaders(s).forEach(function (l) {
+      var low = null;
+      TEAM.forEach(function (t) {
+        if (t.id === l.id || s.trust[t.id] >= 5) return;
+        if (!low || s.trust[t.id] < s.trust[low.id]) low = t;
+      });
+      if (!low) return;
+      var fx = {}; fx[low.id] = 1;
+      applyFx(s, fx);
+      s.lifts++;
+      r.lifts.push({ from: l.id, to: low.id, text: l.lift.replace("{x}", low.name) });
+    });
+    s.progByDay.push(s.prog);
+    r.score = s.score - before;
+    s.day++;
+    if (s.day >= DAYS.length) r.final = finish(s);
+    return r;
+  }
+
+  function finish(s) {
+    var f = { ready: s.prog >= TARGET, leaders: leaders(s).length, score: 0 };
+    if (f.ready) f.score += PTS.ready;
+    f.score += f.leaders * PTS.leader;
+    s.score += f.score;
+    s.done = true;
+    return f;
+  }
+
+  // Play a whole game with a policy. spotsByDay[d] = number of spots right on day d.
+  function simulate(pick, spotsByDay) {
+    var s = newState();
+    DAYS.forEach(function (day, d) {
+      beginDay(s);
+      var right = spotsByDay ? spotsByDay[d] : day.spots.length;
+      s.score += right * PTS.spot; s.spotsRight += right; s.spotsTotal += day.spots.length;
+      closeSpots(s, right);
+      day.moments.forEach(function (m, i) {
+        var opt = pick(s, m, i, day) || cheapest(m);
+        if (!canAfford(s, opt)) opt = cheapest(m);
+        choose(s, opt);
+      });
+      endDay(s);
+    });
+    return s;
+  }
+
+  function cheapest(m) {
+    return m.options.reduce(function (a, o) { return o.cost < a.cost ? o : a; }, m.options[0]);
+  }
+  function byType(type) {
+    return function (s, m) {
+      var o = m.options.filter(function (x) { return x.type === type && canAfford(s, x); })[0];
+      return o || null;
+    };
+  }
+
+  var POLICIES = [
+    { id: "ml", name: "Always micro-lead", pick: byType("ml") },
+    { id: "mm", name: "Always take control", pick: byType("mm") },
+    { id: "wait", name: "Always wait", pick: byType("wait") }
+  ];
+
+  // Best achievable score, by beam search with perfect spotting.
+  function bestScore(width) {
+    width = width || 400;
+    var beam = [newState()];
+    DAYS.forEach(function (day) {
+      var next = [];
+      beam.forEach(function (s0) {
+        var s = clone(s0);
+        beginDay(s);
+        s.score += day.spots.length * PTS.spot; s.spotsRight += day.spots.length; s.spotsTotal += day.spots.length;
+        closeSpots(s, day.spots.length);
+        (function walk(st, i) {
+          if (i === day.moments.length) { var e = clone(st); endDay(e); next.push(e); return; }
+          day.moments[i].options.forEach(function (o) {
+            if (!canAfford(st, o)) return;
+            var c = clone(st); choose(c, o); walk(c, i + 1);
+          });
+        })(s, 0);
+      });
+      var left = DAYS.length - next[0].day;
+      next.forEach(function (s) {
+        var flow = 0; TEAM.forEach(function (t) { flow += CONTRIB[s.trust[t.id]]; });
+        s._h = s.score + flow * left;
+      });
+      next.sort(function (a, b) { return b._h - a._h; });
+      beam = next.slice(0, width);
+    });
+    beam.sort(function (a, b) { return b.score - a.score; });
+    return beam[0].score;
+  }
+
+  return { TARGET: TARGET, MAX_SCORE: MAX_SCORE, ENERGY_BASE: ENERGY_BASE, LEADS_AT: LEADS_AT, CONTRIB: CONTRIB, PTS: PTS,
+    TEAM: TEAM, TYPES: TYPES, DAYS: DAYS, POLICIES: POLICIES,
+    newState: newState, beginDay: beginDay, answerSpot: answerSpot, closeSpots: closeSpots,
+    canAfford: canAfford, choose: choose, endDay: endDay, leaders: leaders, contribution: contribution,
+    simulate: simulate, bestScore: bestScore, clone: clone };
+})();
+/* MODEL END */
+
+/* ---------------------------------------------------------------- UI */
+(function () {
+  "use strict";
+
+  var BEST_KEY = "ripple-microleadership-best";
+  var LEDGER_KEY = "ripple-microleadership-ledger";
+  var SPOT_LABELS = { ml: "Micro-leadership", mm: "Micromanagement", none: "Neither" };
+  var SPOT_ORDER = ["ml", "mm", "none"];
+  var POS = { you: [200, 150], kit: [72, 64], sam: [328, 64], ade: [72, 236], jordan: [328, 236] };
+  var EFFORT = ["has checked out", "did what they were asked", "did their share",
+    "did their share and a bit more", "took ownership of their part", "took ownership and filled gaps"];
+  var ACTS = [
+    "Asked a quiet teammate for their opinion",
+    "Responded with kindness to anger or fear",
+    "Accepted responsibility when it wasn't my fault",
+    "Shared praise with the people who earned it",
+    "Said no when everyone said yes (or yes when everyone said no)",
+    "Took the time to give thoughtful, constructive feedback",
+    "Asked the question no one else would ask",
+    "Arrived early to set up or stayed late to clean up",
+    "Something else"
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var stage = $("stage"), pond = $("pond"), live = $("live"), dlg = $("rulesDlg");
+  var ui = null;
+  var resetTimer = null;
+
+  /* ---------- storage (optional: the game works without it) ---------- */
+  function load(key) { try { return window.localStorage.getItem(key); } catch (e) { return null; } }
+  function save(key, val) { try { window.localStorage.setItem(key, val); } catch (e) { /* private mode */ } }
+  function getBest() { var v = parseInt(load(BEST_KEY), 10); return isNaN(v) ? null : v; }
+  var ledger = (function () { try { return JSON.parse(load(LEDGER_KEY)) || []; } catch (e) { return []; } })();
+  function getLedger() { return ledger; }
+
+  function esc(t) {
+    return String(t).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c];
+    });
+  }
+  function signed(n) { return (n > 0 ? "+" : n < 0 ? "−" : "±") + Math.abs(n); }
+  function nameOf(id) { for (var i = 0; i < RP.TEAM.length; i++) if (RP.TEAM[i].id === id) return RP.TEAM[i].name; return id; }
+  function announce(t) { live.textContent = ""; setTimeout(function () { live.textContent = t; }, 30); }
+  function pipsHtml(n, max, cls) {
+    var h = "";
+    for (var i = 0; i < max; i++) h += "<span class=\"" + cls + (i < n ? " on" : "") + "\"></span>";
+    return h;
+  }
+
+  /* ---------- game state ---------- */
+  function fresh() {
+    return { s: RP.newState(), phase: "intro", spotI: 0, spotAns: null, rightToday: 0, spotsByDay: [],
+      missed: { ml: 0, mm: 0, none: 0 }, momentI: 0, picked: null, lastFx: null, perfect: null,
+      dayInfo: null, report: null, log: [], spotPts: 0, finalBonus: null, lastScore: 0 };
+  }
+
+  function day() { return RP.DAYS[ui.s.day]; }
+
+  /* ---------- HUD and board ---------- */
+  function renderHud() {
+    var s = ui.s, h = "";
+    RP.DAYS.forEach(function (d, i) {
+      var cur = ui.phase !== "intro" && ui.phase !== "end" && i === s.day;
+      var past = i < s.day || ui.phase === "end";
+      h += "<li" + (cur ? " aria-current=\"step\"" : "") + (past ? " class=\"past\"" : "") + ">" + d.name.slice(0, 3) + "</li>";
+    });
+    $("days").innerHTML = h;
+    var sc = $("score");
+    if (s.score !== ui.lastScore) {
+      var diff = s.score - ui.lastScore;
+      var old = sc.parentNode.querySelector(".delta");
+      if (old) old.remove();
+      var d = document.createElement("span");
+      d.className = "delta " + (diff > 0 ? "up" : "down");
+      d.setAttribute("aria-hidden", "true");
+      d.textContent = signed(diff);
+      sc.parentNode.appendChild(d);
+      setTimeout(function () { if (d.parentNode) d.remove(); }, 1400);
+      ui.lastScore = s.score;
+    }
+    sc.textContent = s.score;
+    $("hudProg").textContent = s.prog;
+    $("hudBar").style.width = Math.min(100, s.prog) + "%";
+    var e = ui.phase === "moment" ? s.energy : 0;
+    var cap = RP.ENERGY_BASE + 1;
+    $("hudEnergy").innerHTML = ui.phase === "moment" ? pipsHtml(e, Math.max(cap, e), "pip-e") : "<span class=\"small\">&ndash;</span>";
+    $("hudEnergyTxt").textContent = ui.phase === "moment" ? e + " energy left" : "No energy in use";
+    var b = getBest();
+    $("best").textContent = b === null ? "–" : b;
+  }
+
+  function renderBoard(effects) {
+    var s = ui.s, svg = "<title id=\"pondTitle\">Team map</title>";
+    [62, 108, 152].forEach(function (r) { svg += "<circle class=\"ring\" cx=\"200\" cy=\"150\" r=\"" + r + "\"/>"; });
+    RP.TEAM.forEach(function (t) {
+      var p = POS[t.id], tr = s.trust[t.id];
+      svg += "<line class=\"tie" + (tr <= 1 ? " frayed" : "") + "\" x1=\"200\" y1=\"150\" x2=\"" + p[0] + "\" y2=\"" + p[1] +
+        "\" stroke-width=\"" + (0.8 + tr * 1.3).toFixed(1) + "\"/>";
+    });
+    svg += "<g class=\"node you\"><circle cx=\"200\" cy=\"150\" r=\"30\"/><text x=\"200\" y=\"155\">YOU</text></g>";
+    RP.TEAM.forEach(function (t) {
+      var p = POS[t.id], tr = s.trust[t.id], lead = tr >= RP.LEADS_AT;
+      svg += "<g class=\"node" + (lead ? " leads" : "") + "\"><circle cx=\"" + p[0] + "\" cy=\"" + p[1] + "\" r=\"28\"/>" +
+        "<text class=\"nm\" x=\"" + p[0] + "\" y=\"" + (p[1] + 5) + "\">" + t.name + "</text>";
+      for (var k = 0; k < 5; k++) {
+        svg += "<rect class=\"pip" + (k < tr ? " on" : "") + "\" x=\"" + (p[0] - 29 + k * 12) + "\" y=\"" + (p[1] + 35) + "\" width=\"10\" height=\"10\"/>";
+      }
+      if (lead) svg += "<text class=\"leadtag\" x=\"" + p[0] + "\" y=\"" + (p[1] - 36) + "\">LEADS</text>";
+      svg += "</g>";
+    });
+    pond.innerHTML = svg;
+    var desc = RP.TEAM.map(function (t) {
+      return t.name + " trust " + s.trust[t.id] + " of 5" + (s.trust[t.id] >= RP.LEADS_AT ? ", micro-leading" : "");
+    }).join("; ");
+    pond.setAttribute("aria-label", "Team map. " + desc + ".");
+    pond.removeAttribute("aria-labelledby");
+
+    (effects || []).forEach(function (fx, i) {
+      setTimeout(function () { ripple(fx.id, fx.kind); }, i * 160);
+    });
+
+    var pct = Math.min(150, s.prog) / 150 * 100;
+    $("progFill").style.width = pct + "%";
+    $("progFill").style.background = s.prog >= RP.TARGET ? "var(--ml)" : "var(--you)";
+    $("progTxt").textContent = s.prog + " / " + RP.TARGET;
+    $("progMeter").setAttribute("aria-valuenow", Math.min(150, s.prog));
+    $("progMeter").setAttribute("aria-valuetext", s.prog + " of " + RP.TARGET + " needed");
+
+    var h = "";
+    RP.TEAM.forEach(function (t) {
+      var tr = s.trust[t.id];
+      h += "<li><span class=\"nm\">" + t.name + (tr >= RP.LEADS_AT ? "<span class=\"badge\">LEADS</span>" : "") + "</span>" +
+        "<span class=\"role\">" + t.role + "</span>" +
+        "<span class=\"tr\">trust " + tr + "/5<br>+" + RP.contribution(tr) + " tomorrow</span></li>";
+    });
+    $("teamList").innerHTML = h;
+  }
+
+  function ripple(id, kind) {
+    var p = POS[id];
+    if (!p) return;
+    var c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    c.setAttribute("cx", p[0]); c.setAttribute("cy", p[1]); c.setAttribute("r", "30");
+    c.setAttribute("class", "rip r-" + kind);
+    pond.appendChild(c);
+    setTimeout(function () { if (c.parentNode) c.parentNode.removeChild(c); }, 1100);
+  }
+
+  function trustEffects(d, kind) {
+    var out = [];
+    Object.keys(d.trust || {}).forEach(function (id) {
+      out.push({ id: id, kind: kind || (d.trust[id] > 0 ? "up" : "down") });
+    });
+    return out;
+  }
+
+  function fxChips(d) {
+    var h = "";
+    Object.keys(d.trust).forEach(function (id) {
+      var v = d.trust[id];
+      h += "<li class=\"" + (v > 0 ? "up" : "down") + "\">" + nameOf(id) + " trust " + signed(v) + "</li>";
+    });
+    if (d.prog) h += "<li class=\"" + (d.prog > 0 ? "up" : "down") + "\">Readiness " + signed(d.prog) + "</li>";
+    if (!h) h = "<li>No visible change</li>";
+    h += "<li>Score " + signed(d.score) + "</li>";
+    return "<ul class=\"fx\">" + h + "</ul>";
+  }
+
+  function fxText(d) {
+    var parts = [];
+    Object.keys(d.trust).forEach(function (id) { parts.push(nameOf(id) + " trust " + signed(d.trust[id])); });
+    if (d.prog) parts.push("readiness " + signed(d.prog));
+    parts.push("score " + signed(d.score));
+    return parts.join(", ");
+  }
+
+  function show(html, focusSel) {
+    stage.innerHTML = html;
+    renderHud();
+    if (focusSel === false) return;
+    var f = focusSel ? stage.querySelector(focusSel) : stage.querySelector("h2");
+    if (f) {
+      if (f.tagName === "H2") f.setAttribute("tabindex", "-1");
+      f.focus({ preventScroll: false });
+    }
+  }
+
+  /* ---------- screens ---------- */
+  function renderIntro(initial) {
+    var b = getBest();
+    show(
+      "<p class=\"eyebrow\">Before you start</p>" +
+      "<h2>Lead without being the leader</h2>" +
+      "<p>You are one of five second-years pitching a campus refill-station scheme to the Students' Union changemaker fund. Kit is the coordinator. You are not. Alex Budak argues that this does not matter: leadership is not a position but a continuous choice to serve others, made in small acts. He calls it <strong>micro-leadership</strong>.</p>" +
+      "<ol class=\"steps\">" +
+      "<li><strong>Spot it.</strong> Each day opens with three everyday scenes. Is each micro-leadership, micromanagement, or neither? Three out of three earns an extra energy.</li>" +
+      "<li><strong>Make your moves.</strong> Moments land on your desk. Every response costs energy, and you cannot afford them all. Effects are revealed after you choose.</li>" +
+      "<li><strong>Watch the ripples.</strong> Trust you build today shows up in tomorrow's work. Teammates who trust enough start leading, too.</li>" +
+      "</ol>" +
+      "<h3>How you score</h3>" +
+      "<ul class=\"rules-list\">" +
+      "<li>+10 per scene classified correctly.</li>" +
+      "<li>+1 per readiness point, +5 per trust point gained (and the same lost when they fall).</li>" +
+      "<li>Friday: +50 if the pitch reaches 100 readiness, +10 per teammate who is micro-leading.</li>" +
+      "</ul>" +
+      "<p class=\"small\">About 8 minutes. The maximum is " + RP.MAX_SCORE + ". " + (b === null ? "No personal best yet." : "Your personal best is " + b + ".") + " Rules are always one click away.</p>" +
+      "<div class=\"actions\"><button type=\"button\" class=\"btn primary\" data-act=\"start\">Start Monday</button></div>",
+      initial ? false : null
+    );
+  }
+
+  function renderDayIntro() {
+    var d = day(), info = ui.dayInfo, h = "";
+    h += "<p class=\"eyebrow\">Day " + (ui.s.day + 1) + " of " + RP.DAYS.length + " &middot; " + d.name + "</p>";
+    h += "<h2>" + d.title + "</h2><p>" + esc(d.setup) + "</p>";
+    if (info.event) {
+      h += "<div class=\"alert\" role=\"alert\"><strong>Overnight:</strong> " + esc(info.event.text) +
+        " Readiness " + signed(info.event.d.prog) + ", score " + signed(info.event.d.score) +
+        ". That is the cost of the question nobody asked on Tuesday.</div>";
+    }
+    if (info.tired) h += "<div class=\"banner\">You pulled an all-nighter. You start today with " + ui.s.energy + " energy instead of " + RP.ENERGY_BASE + ".</div>";
+    h += "<div class=\"actions\"><button type=\"button\" class=\"btn primary\" data-act=\"to-spots\">Spot the leadership</button></div>";
+    show(h);
+  }
+
+  function renderSpot() {
+    var d = day(), sp = d.spots[ui.spotI], a = ui.spotAns, h = "";
+    h += "<p class=\"eyebrow\">" + d.name + " &middot; Spot it &middot; " + (ui.spotI + 1) + " of " + d.spots.length + "</p>";
+    h += "<h2 id=\"spotQ\">What is going on here?</h2>";
+    h += "<p class=\"scene\">" + esc(sp.text) + "</p>";
+    h += "<div class=\"choices three\" role=\"group\" aria-labelledby=\"spotQ\">";
+    SPOT_ORDER.forEach(function (k, i) {
+      var cls = "choice";
+      if (a) cls += (k === sp.answer ? " picked k-" + (k === "none" ? "none" : k) : "");
+      h += "<button type=\"button\" class=\"" + cls + "\" data-act=\"spot\" data-v=\"" + k + "\" data-key=\"" + (i + 1) + "\"" + (a ? " disabled" : "") + ">" +
+        "<kbd>" + (i + 1) + "</kbd><span class=\"lbl\">" + SPOT_LABELS[k] + (a && k === a && k !== sp.answer ? " <span class=\"small\">(your call)</span>" : "") + "</span></button>";
+    });
+    h += "</div>";
+    if (a) {
+      var ok = a === sp.answer;
+      h += "<div class=\"feedback\"><p class=\"verdict " + (ok ? "ok" : "no") + "\">" +
+        (ok ? "✓ Right: " + SPOT_LABELS[sp.answer] + ". +" + RP.PTS.spot : "✗ Not quite. This one is " + SPOT_LABELS[sp.answer] + ".") + "</p>" +
+        "<p>" + esc(sp.why) + "</p></div>";
+      var last = ui.spotI === d.spots.length - 1;
+      h += "<div class=\"actions\"><button type=\"button\" class=\"btn primary\" data-act=\"next-spot\">" + (last ? "Make your moves" : "Next scene") + "</button></div>";
+    }
+    show(h, a ? "[data-act=next-spot]" : null);
+  }
+
+  function renderMoment() {
+    var d = day(), m = d.moments[ui.momentI], s = ui.s, picked = ui.picked, h = "";
+    h += "<p class=\"eyebrow\">" + d.name + " &middot; Your move &middot; " + (ui.momentI + 1) + " of " + d.moments.length + "</p>";
+    if (ui.momentI === 0 && !picked) {
+      h += ui.perfect
+        ? "<div class=\"banner good\">Spotting " + ui.rightToday + "/" + d.spots.length + ". Sharp eyes: you see more chances to lead. +1 energy today.</div>"
+        : "<div class=\"banner\">Spotting " + ui.rightToday + "/" + d.spots.length + ". No bonus energy today.</div>";
+    }
+    h += "<h2 id=\"momQ\">" + esc(m.head) + "</h2>";
+    h += "<p class=\"scene\">" + esc(m.text) + "</p>";
+    h += "<p class=\"energy-line\">Energy left <span class=\"pips\" aria-hidden=\"true\">" + pipsHtml(s.energy, Math.max(s.energy, RP.ENERGY_BASE + 1), "pip-e") + "</span> " + s.energy + "</p>";
+    h += "<div class=\"choices\" role=\"group\" aria-labelledby=\"momQ\">";
+    m.options.forEach(function (o, i) {
+      var afford = RP.canAfford(s, o), isPick = picked === i;
+      var cls = "choice" + (isPick ? " picked k-" + o.type : "");
+      var dis = picked !== null || !afford;
+      h += "<button type=\"button\" class=\"" + cls + "\" data-act=\"choose\" data-i=\"" + i + "\" data-key=\"" + (i + 1) + "\"" + (dis ? " disabled" : "") + ">" +
+        "<kbd>" + (i + 1) + "</kbd><span class=\"lbl\">" + esc(o.label) +
+        (!afford && picked === null ? " <span class=\"small\">(not enough energy)</span>" : "") +
+        (picked !== null ? "<span class=\"reveal\"><span class=\"tag t-" + o.type + "\">" + RP.TYPES[o.type].label + "</span></span>" : "") +
+        "</span><span class=\"cost\">" + (o.cost === 0 ? "free" : o.cost + " energy") + "</span></button>";
+    });
+    h += "</div>";
+    if (picked !== null) {
+      var o = m.options[picked], ty = RP.TYPES[o.type];
+      h += "<div class=\"feedback\"><p><span class=\"tag t-" + o.type + "\">" + ty.label + "</span></p>" +
+        "<p>" + esc(o.says) + "</p>" + fxChips(ui.lastFx) + "<p class=\"why\">" + esc(ty.why) + "</p></div>";
+      var last = ui.momentI === d.moments.length - 1;
+      h += "<div class=\"actions\"><button type=\"button\" class=\"btn primary\" data-act=\"next-moment\">" + (last ? "End the day" : "Next moment") + "</button></div>";
+    } else if (ui.momentI < d.moments.length - 1) {
+      var rest = d.moments.slice(ui.momentI + 1).map(function (x) { return esc(x.head); });
+      h += "<p class=\"upcoming\">Still to come today: " + rest.join(" &middot; ") + ". Unspent energy becomes solo work (+" + RP.PTS.solo + " readiness each).</p>";
+    } else {
+      h += "<p class=\"upcoming\">Last moment today. Unspent energy becomes solo work (+" + RP.PTS.solo + " readiness each).</p>";
+    }
+    show(h, picked !== null ? "[data-act=next-moment]" : null);
+  }
+
+  function renderReport() {
+    var r = ui.report, d = RP.DAYS[ui.s.day - 1], h = "";
+    h += "<p class=\"eyebrow\">End of " + d.name + "</p>";
+    h += "<h2>What happened while you weren't watching</h2><ul class=\"report\">";
+    if (r.solo) h += "<li><span>Your solo work with leftover energy</span><span class=\"amt\">+" + r.solo + "</span></li>";
+    r.contribs.forEach(function (c) {
+      var t = ui.s.morning[c.id];
+      h += "<li><span><strong>" + nameOf(c.id) + "</strong> " + EFFORT[t] + " <span class=\"small\">(trust " + t + " this morning)</span></span><span class=\"amt\">+" + c.amount + "</span></li>";
+    });
+    h += "</ul>";
+    h += "<h3>Ripples</h3>";
+    if (r.lifts.length) {
+      r.lifts.forEach(function (l) { h += "<p class=\"lift\">" + esc(l.text) + " <strong>" + nameOf(l.to) + " trust +1.</strong></p>"; });
+      h += "<p class=\"small\">Nobody asked them to. A world full of micro-leadership is one where it is possible for everyone to be a leader without being <em>the</em> leader.</p>";
+    } else {
+      h += "<p class=\"small\">No ripples yet. A teammate starts micro-leading on their own once their trust reaches " + RP.LEADS_AT + ".</p>";
+    }
+    h += "<p><strong>Readiness " + ui.s.prog + " / " + RP.TARGET + ".</strong> Points this evening: " + signed(r.score) + ".</p>";
+    var lastDay = ui.s.day >= RP.DAYS.length;
+    h += "<div class=\"actions\"><button type=\"button\" class=\"btn primary\" data-act=\"" + (lastDay ? "results" : "next-day") + "\">" +
+      (lastDay ? "Walk into the pitch" : "Start " + RP.DAYS[ui.s.day].name) + "</button></div>";
+    show(h);
+  }
+
+  function grade(pct) {
+    if (pct >= 85) return "Changemaker";
+    if (pct >= 70) return "Strong";
+    if (pct >= 50) return "Developing";
+    if (pct >= 30) return "Emerging";
+    return "Bystander";
+  }
+
+  function renderEnd() {
+    var s = ui.s, f = ui.finalBonus, c = s.counts;
+    var pct = Math.max(0, Math.min(100, Math.round(s.score / RP.MAX_SCORE * 100)));
+    var g = grade(pct);
+    var prevBest = getBest(), isBest = prevBest === null || s.score > prevBest;
+    if (isBest) save(BEST_KEY, String(s.score));
+    var spotPts = s.spotsRight * RP.PTS.spot;
+    var moveFlow = s.score - spotPts - f.score;
+
+    var sims = RP.POLICIES.map(function (p) { return { p: p, s: RP.simulate(p.pick, ui.spotsByDay) }; });
+    var ctrl = sims[1].s;
+
+    var h = "<p class=\"eyebrow\">Friday, 4pm &middot; The pitch</p>";
+    h += "<h2>" + (f.ready ? "Funded. The refill stations are happening." : "Not funded. This time.") + "</h2>";
+    h += "<p>" + (f.ready
+      ? "Readiness " + s.prog + " / " + RP.TARGET + ". The panel loved the loyalty stamp."
+      : "Readiness " + s.prog + " / " + RP.TARGET + ". The panel liked the idea and asked you to come back next term with firmer evidence.") + "</p>";
+    h += "<div class=\"result\"><span class=\"bigscore\">" + s.score + "</span><span><span class=\"grade\">" + s.score + " / " + RP.MAX_SCORE + " &middot; " + pct + "% &middot; " + g + "</span><br>" +
+      "<span class=\"pb\">" + (isBest ? (prevBest === null ? "Your first personal best." : "New personal best (previous " + prevBest + ").") : "Personal best: " + prevBest + ".") + "</span></span></div>";
+
+    h += "<table class=\"breakdown\"><caption class=\"sr-only\">Score breakdown</caption><tbody>" +
+      "<tr><th scope=\"row\">Spotting: " + s.spotsRight + " of " + s.spotsTotal + " scenes right</th><td class=\"n\">" + spotPts + "</td></tr>" +
+      "<tr><th scope=\"row\">Your moves and their ripples: readiness and trust gained or lost</th><td class=\"n\">" + moveFlow + "</td></tr>" +
+      "<tr><th scope=\"row\">Pitch funded</th><td class=\"n\">" + (f.ready ? RP.PTS.ready : 0) + "</td></tr>" +
+      "<tr><th scope=\"row\">Teammates micro-leading by Friday: " + f.leaders + " of " + RP.TEAM.length + "</th><td class=\"n\">" + f.leaders * RP.PTS.leader + "</td></tr>" +
+      "<tr class=\"total\"><td>Total</td><td class=\"n\">" + s.score + "</td></tr></tbody></table>";
+
+    h += "<h3>What your score says</h3><div class=\"debrief\">" + debrief(s, f, ctrl) + "</div>";
+
+    h += "<h3>Your week against three fixed habits</h3>";
+    h += "<p class=\"small\">Same scenes, same spotting record as you; only the moves differ. Hover or tab across the chart for each day's figures.</p>";
+    h += chartHtml(sims);
+
+    h += "<details><summary>Your week, move by move</summary><ol class=\"log\">" + ui.log.map(function (l) {
+      return "<li><strong>" + l.day + ", " + esc(l.head) + ":</strong> " + esc(l.label) + " <span class=\"tag t-" + l.type + "\">" + RP.TYPES[l.type].label + "</span></li>";
+    }).join("") + "</ol></details>";
+
+    h += "<h3>How the game maps to the real thing</h3><ul class=\"map\">" +
+      "<li><b>Energy and cost</b>Micro-leadership is cheap and repeatable: a question, a thank-you, ten minutes early. Grand gestures cost a whole day's energy and change little about an ordinary Tuesday. Small acts add up.</li>" +
+      "<li><b>Trust sets tomorrow's output</b>Teammates contribute according to the trust they started the day with. That is why taking control looks good on Monday and expensive by Thursday: it buys visible progress now and spends the trust that produces work when you are not watching.</li>" +
+      "<li><b>Micro-leadership vs micromanagement</b>Both are small and frequent. The difference is the direction: micromanagement comes from a lack of trust and controls people; micro-leadership builds trust and gives them room to do the job.</li>" +
+      "<li><b>Ripples</b>Teammates at trust 4 or more start micro-leading on their own. In Budak's words, rather than the exceptional few, leaders become &ldquo;the exceptional many&rdquo;.</li>" +
+      "<li><b>Waiting</b>Waiting costs nothing today, but people and problems decay while you do. Budak's challenge is to &ldquo;stop waiting for someone to tell us we are the leader&rdquo;.</li>" +
+      "<li><b>Spotting earns energy</b>Seeing leadership in ordinary moments gives you more chances to act. The next section asks you to spot it in your own life.</li>" +
+      "</ul>";
+
+    h += ledgerHtml();
+    h += "<div class=\"actions\"><button type=\"button\" class=\"btn primary\" data-act=\"again\">Play again</button></div>";
+    show(h);
+    wireChart(sims);
+    announce("Final score " + s.score + " of " + RP.MAX_SCORE + ", " + pct + " percent, " + g + ". " + (f.ready ? "Funded." : "Not funded."));
+  }
+
+  function debrief(s, f, ctrl) {
+    var c = s.counts, out = [];
+    var hints = {
+      ml: "small acts of service that are easy to overlook precisely because they are so ordinary",
+      mm: "control that looks like diligence: checking, approving, rewriting",
+      none: "titles, grand gestures and waiting, which look like leadership but are not acts of it"
+    };
+    var worst = SPOT_ORDER.slice().sort(function (a, b) { return ui.missed[b] - ui.missed[a]; })[0];
+    if (s.spotsRight === s.spotsTotal) {
+      out.push("<strong>Spotting " + s.spotsRight + "/" + s.spotsTotal + ".</strong> You told micro-leadership from micromanagement, and both from mere position or spectacle, every time. That earned you an extra energy every day.");
+    } else if (s.spotsRight >= 12) {
+      out.push("<strong>Spotting " + s.spotsRight + "/" + s.spotsTotal + ".</strong> Solid. Most misses were scenes that were really " + SPOT_LABELS[worst].toLowerCase() + ": " + hints[worst] + ".");
+    } else {
+      out.push("<strong>Spotting " + s.spotsRight + "/" + s.spotsTotal + ".</strong> The categories blurred, which cost you points and energy. Look again at " + SPOT_LABELS[worst].toLowerCase() + ": " + hints[worst] + ".");
+    }
+    var moves = c.ml + c.mm + c.wait + c.gg + c.none;
+    var p = "<strong>Your " + moves + " moves:</strong> " + c.ml + " micro-leadership, " + c.mm + " micromanagement, " + c.wait + " waiting, " + c.gg + " grand gesture" + (c.gg === 1 ? "" : "s") + ", " + c.none + " other. ";
+    if (c.mm >= 3) p += "You took control " + c.mm + " times. Each one lifted readiness straight away and cost trust, and trust is what sets tomorrow's output. ";
+    if (c.wait >= 3) p += "You waited " + c.wait + " times. None of those moments needed a title, only someone willing to act. ";
+    if (c.gg >= 1) p += "A grand gesture costs 3 energy, the price of three small acts, and leaves little behind. ";
+    if (c.ml >= 12 && c.mm + c.wait <= 3) p += "You chose small, trust-building acts almost every time. The energy limit meant you could not do them all: choosing where to lead is part of leading. ";
+    out.push(p);
+    var low = RP.TEAM.slice().sort(function (a, b) { return s.trust[a.id] - s.trust[b.id]; })[0];
+    var t = "<strong>Your team:</strong> by Friday " + f.leaders + " of " + RP.TEAM.length + " teammates were micro-leading, and they set off " + s.lifts + " ripple" + (s.lifts === 1 ? "" : "s") + " you did not have to start. ";
+    if (f.leaders >= 3) t += "Leadership stopped being yours and became the team's. ";
+    else if (f.leaders === 0) t += "Nobody reached trust " + RP.LEADS_AT + ", so everything that happened depended on you. ";
+    if (s.trust[low.id] < 3) t += "Your weakest relationship was with " + low.name + " (trust " + s.trust[low.id] + "). ";
+    out.push(t);
+    var r = "<strong>The pitch:</strong> " + s.prog + " readiness, against " + ctrl.prog + " for someone who took control at every chance. ";
+    var ctrlLedMonday = ctrl.progByDay[1] > s.progByDay[1];
+    if (s.prog > ctrl.prog) {
+      r += ctrlLedMonday
+        ? "The controller was ahead of you on Monday and fell behind as trust drained away."
+        : "Control never caught up: every time it bought progress, it spent the trust that produces tomorrow's work.";
+    } else {
+      r += "Taking control would have got more done this week; it would also have left a team that waits to be told.";
+    }
+    out.push(r);
+    return out.map(function (x) { return "<p>" + x + "</p>"; }).join("");
+  }
+
+  /* ---------- end-of-game chart ---------- */
+  var SERIES_STYLE = {
+    you: { name: "You", color: "var(--you)", dash: "", w: 3 },
+    ml: { name: "Always micro-lead", color: "var(--ml)", dash: "", w: 2 },
+    mm: { name: "Always take control", color: "var(--mm)", dash: "8 5", w: 2 },
+    wait: { name: "Always wait", color: "var(--wait)", dash: "2 4", w: 2 }
+  };
+  var CH = { W: 640, H: 280, l: 40, r: 132, t: 14, b: 32 };
+  var DAY_LBL = ["Start", "Mon", "Tue", "Wed", "Thu", "Fri"];
+
+  function seriesData(sims) {
+    var out = [{ id: "you", data: ui.s.progByDay }];
+    sims.forEach(function (x) { out.push({ id: x.p.id, data: x.s.progByDay }); });
+    return out;
+  }
+
+  function chartHtml(sims) {
+    var ser = seriesData(sims);
+    var max = 0;
+    ser.forEach(function (x) { x.data.forEach(function (v) { if (v > max) max = v; }); });
+    var ymax = Math.max(150, Math.ceil(max / 50) * 50);
+    var pw = CH.W - CH.l - CH.r, ph = CH.H - CH.t - CH.b;
+    var X = function (i) { return CH.l + i * pw / (DAY_LBL.length - 1); };
+    var Y = function (v) { return CH.t + (1 - v / ymax) * ph; };
+    var h = "<ul class=\"legend\" aria-hidden=\"true\">";
+    ser.forEach(function (x) {
+      var st = SERIES_STYLE[x.id];
+      h += "<li><svg width=\"28\" height=\"10\"><line x1=\"1\" y1=\"5\" x2=\"27\" y2=\"5\" stroke=\"" + st.color + "\" stroke-width=\"" + (st.w + 0.5) + "\" stroke-dasharray=\"" + st.dash + "\"/></svg>" + st.name + "</li>";
+    });
+    h += "</ul><div class=\"chart-wrap\" id=\"chartWrap\">";
+    h += "<svg class=\"chart\" id=\"chart\" viewBox=\"0 0 " + CH.W + " " + CH.H + "\" role=\"group\" aria-label=\"Line chart of pitch readiness by day for you and three fixed habits. A table version follows.\">";
+    for (var g = 0; g <= ymax; g += 50) {
+      h += "<line class=\"grid\" x1=\"" + CH.l + "\" x2=\"" + (CH.l + pw) + "\" y1=\"" + Y(g) + "\" y2=\"" + Y(g) + "\"/>";
+      h += "<text class=\"axis\" x=\"" + (CH.l - 6) + "\" y=\"" + (Y(g) + 4) + "\" text-anchor=\"end\">" + g + "</text>";
+    }
+    DAY_LBL.forEach(function (d, i) {
+      h += "<text class=\"axis\" x=\"" + X(i) + "\" y=\"" + (CH.H - 10) + "\" text-anchor=\"middle\">" + d + "</text>";
+    });
+    h += "<line class=\"goal\" x1=\"" + CH.l + "\" x2=\"" + (CH.l + pw) + "\" y1=\"" + Y(RP.TARGET) + "\" y2=\"" + Y(RP.TARGET) + "\"/>";
+    h += "<text class=\"goal-lbl\" x=\"" + (CH.l + 6) + "\" y=\"" + (Y(RP.TARGET) - 6) + "\">Funding line</text>";
+    h += "<line class=\"cross\" id=\"cross\" x1=\"0\" x2=\"0\" y1=\"" + CH.t + "\" y2=\"" + (CH.t + ph) + "\" visibility=\"hidden\"/>";
+    ser.slice().reverse().forEach(function (x) {
+      var st = SERIES_STYLE[x.id];
+      var d = x.data.map(function (v, i) { return (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1); }).join(" ");
+      h += "<path d=\"" + d + "\" fill=\"none\" stroke=\"" + st.color + "\" stroke-width=\"" + st.w + "\" stroke-dasharray=\"" + st.dash + "\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/>";
+      x.data.forEach(function (v, i) {
+        h += "<circle cx=\"" + X(i).toFixed(1) + "\" cy=\"" + Y(v).toFixed(1) + "\" r=\"4\" fill=\"" + st.color + "\" stroke=\"var(--card)\" stroke-width=\"2\"/>";
+      });
+    });
+    // direct labels at line ends, nudged apart so they never collide
+    var ends = ser.map(function (x) { return { id: x.id, y: Y(x.data[x.data.length - 1]), v: x.data[x.data.length - 1] }; });
+    ends.sort(function (a, b) { return a.y - b.y; });
+    for (var k = 1; k < ends.length; k++) if (ends[k].y - ends[k - 1].y < 15) ends[k].y = ends[k - 1].y + 15;
+    var over = ends[ends.length - 1].y - (CH.t + ph);
+    if (over > 0) ends.forEach(function (e) { e.y -= over; });
+    ends.forEach(function (e) {
+      h += "<text class=\"end-lbl\" x=\"" + (X(DAY_LBL.length - 1) + 10) + "\" y=\"" + (e.y + 4) + "\">" + SERIES_STYLE[e.id].name.replace("Always ", "") + " " + e.v + "</text>";
+    });
+    DAY_LBL.forEach(function (d, i) {
+      var x0 = i === 0 ? CH.l - 10 : (X(i - 1) + X(i)) / 2, x1 = i === DAY_LBL.length - 1 ? X(i) + 10 : (X(i) + X(i + 1)) / 2;
+      var lbl = d + ": " + ser.map(function (x) { return SERIES_STYLE[x.id].name + " " + x.data[i]; }).join(", ");
+      h += "<rect class=\"hit\" data-i=\"" + i + "\" x=\"" + x0 + "\" y=\"" + CH.t + "\" width=\"" + (x1 - x0) + "\" height=\"" + ph + "\" tabindex=\"0\" role=\"img\" aria-label=\"" + lbl + "\"/>";
+    });
+    h += "</svg><div class=\"tip\" id=\"tip\" hidden></div></div>";
+    h += "<details><summary>Show as a table</summary><table class=\"datatable\"><caption class=\"sr-only\">Pitch readiness at the end of each day</caption><thead><tr><th scope=\"col\">Habit</th>";
+    DAY_LBL.forEach(function (d) { h += "<th scope=\"col\">" + d + "</th>"; });
+    h += "<th scope=\"col\">Score</th></tr></thead><tbody>";
+    ser.forEach(function (x, i) {
+      var sc = i === 0 ? ui.s.score : sims[i - 1].s.score;
+      h += "<tr><th scope=\"row\">" + SERIES_STYLE[x.id].name + "</th>" + x.data.map(function (v) { return "<td>" + v + "</td>"; }).join("") + "<td>" + sc + "</td></tr>";
+    });
+    h += "</tbody></table></details>";
+    return h;
+  }
+
+  function wireChart(sims) {
+    var svg = $("chart"), tip = $("tip"), wrap = $("chartWrap"), cross = $("cross");
+    if (!svg) return;
+    var ser = seriesData(sims);
+    function showTip(rect) {
+      var i = +rect.getAttribute("data-i");
+      var x = CH.l + i * (CH.W - CH.l - CH.r) / (DAY_LBL.length - 1);
+      cross.setAttribute("x1", x); cross.setAttribute("x2", x); cross.setAttribute("visibility", "visible");
+      tip.innerHTML = "<strong>" + DAY_LBL[i] + "</strong>" + ser.map(function (s) {
+        return SERIES_STYLE[s.id].name + ": " + s.data[i];
+      }).join("<br>");
+      tip.hidden = false;
+      var scale = svg.getBoundingClientRect().width / CH.W;
+      var px = x * scale, w = tip.offsetWidth;
+      var left = px + 12 + w > wrap.clientWidth ? px - 12 - w : px + 12;
+      tip.style.left = Math.max(0, left) + "px";
+      tip.style.top = "8px";
+    }
+    function hide() { tip.hidden = true; cross.setAttribute("visibility", "hidden"); }
+    Array.prototype.forEach.call(svg.querySelectorAll(".hit"), function (r) {
+      r.addEventListener("mouseenter", function () { showTip(r); });
+      r.addEventListener("focus", function () { showTip(r); });
+      r.addEventListener("mouseleave", hide);
+      r.addEventListener("blur", hide);
+    });
+  }
+
+  /* ---------- reflection ledger (not scored) ---------- */
+  function ledgerHtml() {
+    var h = "<section class=\"ledger\" aria-labelledby=\"ledgerH\"><h3 id=\"ledgerH\">Your turn: the real ledger</h3>";
+    h += "<p>This part is not scored; it is the point. Think of a time in the past year when you led without being <em>the</em> leader: in a seminar group, a job, a society, a household. Which act was it, and what changed because of it?</p>";
+    h += "<form id=\"ledgerForm\" novalidate>";
+    h += "<div class=\"field\"><label for=\"lgAct\">What kind of act was it?</label><select id=\"lgAct\">" +
+      ACTS.map(function (a) { return "<option>" + esc(a) + "</option>"; }).join("") + "</select></div>";
+    h += "<div class=\"field\"><label for=\"lgWhat\">What did you do?</label><textarea id=\"lgWhat\" rows=\"2\" required></textarea></div>";
+    h += "<div class=\"field\"><label for=\"lgChange\">What changed because of it, for whom?</label><textarea id=\"lgChange\" rows=\"2\"></textarea></div>";
+    h += "<div class=\"actions\"><button type=\"submit\" class=\"btn\">Add to my ledger</button></div>";
+    h += "<p class=\"small\" id=\"ledgerMsg\" role=\"status\"></p></form>";
+    h += "<div id=\"ledgerOut\">" + ledgerListHtml() + "</div>";
+    h += "<p class=\"small\">Saved only in this browser, on this device. Nothing is sent anywhere.</p></section>";
+    return h;
+  }
+
+  function ledgerListHtml() {
+    var list = getLedger();
+    if (!list.length) return "";
+    return "<ol class=\"ledger-list\">" + list.map(function (e) {
+      return "<li><strong>" + esc(e.act) + ".</strong> " + esc(e.what) + (e.change ? " <em>What changed:</em> " + esc(e.change) : "") + "</li>";
+    }).join("") + "</ol><div class=\"actions\"><button type=\"button\" class=\"btn\" data-act=\"ledger-copy\">Copy ledger</button>" +
+      "<button type=\"button\" class=\"btn\" data-act=\"ledger-clear\">Clear ledger</button></div>";
+  }
+
+  function ledgerText() {
+    return getLedger().map(function (e, i) {
+      return (i + 1) + ". " + e.act + ": " + e.what + (e.change ? " What changed: " + e.change : "");
+    }).join("\n");
+  }
+
+  /* ---------- flow ---------- */
+  function startGame() {
+    ui = fresh();
+    ui.phase = "day";
+    renderBoard();
+    beginDay();
+  }
+
+  function beginDay() {
+    ui.dayInfo = RP.beginDay(ui.s);
+    ui.phase = "day";
+    renderBoard();
+    renderDayIntro();
+    if (ui.dayInfo.event) announce("Overnight setback: readiness " + signed(ui.dayInfo.event.d.prog) + ".");
+  }
+
+  function act(a, el) {
+    var s = ui.s;
+    if (a === "start") { startGame(); return; }
+    if (a === "again") { ui = fresh(); renderBoard(); renderIntro(); return; }
+    if (a === "to-spots") { ui.phase = "spot"; ui.spotI = 0; ui.spotAns = null; ui.rightToday = 0; renderSpot(); return; }
+    if (a === "spot") {
+      if (ui.spotAns) return;
+      var sp = day().spots[ui.spotI];
+      ui.spotAns = el.getAttribute("data-v");
+      var ok = RP.answerSpot(s, sp, ui.spotAns);
+      if (ok) ui.rightToday++; else ui.missed[sp.answer]++;
+      renderSpot();
+      announce((ok ? "Right. " : "Not quite. It is " + SPOT_LABELS[sp.answer] + ". ") + sp.why);
+      return;
+    }
+    if (a === "next-spot") {
+      if (ui.spotI < day().spots.length - 1) { ui.spotI++; ui.spotAns = null; renderSpot(); return; }
+      ui.spotsByDay[s.day] = ui.rightToday;
+      ui.perfect = RP.closeSpots(s, ui.rightToday);
+      ui.phase = "moment"; ui.momentI = 0; ui.picked = null;
+      renderMoment();
+      announce("Spotting " + ui.rightToday + " of 3. " + (ui.perfect ? "Plus one energy." : "") + " You have " + s.energy + " energy.");
+      return;
+    }
+    if (a === "choose") {
+      if (ui.picked !== null) return;
+      var i = +el.getAttribute("data-i"), m = day().moments[ui.momentI], o = m.options[i];
+      if (!RP.canAfford(s, o)) return;
+      ui.picked = i;
+      ui.lastFx = RP.choose(s, o);
+      ui.log.push({ day: day().name.slice(0, 3), head: m.head, label: o.label, type: o.type });
+      renderMoment();
+      renderBoard(trustEffects(ui.lastFx));
+      announce(RP.TYPES[o.type].label + ". " + o.says + " " + fxText(ui.lastFx) + ".");
+      return;
+    }
+    if (a === "next-moment") {
+      if (ui.momentI < day().moments.length - 1) { ui.momentI++; ui.picked = null; renderMoment(); return; }
+      ui.report = RP.endDay(s);
+      if (ui.report.final) ui.finalBonus = ui.report.final;
+      ui.phase = "report";
+      var eff = ui.report.lifts.map(function (l) { return { id: l.to, kind: "lift" }; });
+      renderBoard(eff);
+      renderReport();
+      announce("End of day. Readiness " + s.prog + ". " + (ui.report.lifts.length ? ui.report.lifts.length + " ripple" + (ui.report.lifts.length > 1 ? "s" : "") + " from teammates." : ""));
+      return;
+    }
+    if (a === "next-day") { beginDay(); return; }
+    if (a === "results") { ui.phase = "end"; renderBoard(); renderEnd(); return; }
+    if (a === "ledger-copy") { copyText(ledgerText()); return; }
+    if (a === "ledger-clear") {
+      ledger = [];
+      save(LEDGER_KEY, "[]");
+      $("ledgerOut").innerHTML = "";
+      $("ledgerMsg").textContent = "Ledger cleared.";
+      return;
+    }
+  }
+
+  function copyText(t) {
+    var msg = $("ledgerMsg");
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = t; ta.setAttribute("readonly", ""); ta.style.position = "absolute"; ta.style.left = "-9999px";
+      document.body.appendChild(ta); ta.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      msg.textContent = ok ? "Copied." : "Copy failed: select the list and copy it by hand.";
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(t).then(function () { msg.textContent = "Copied."; }, fallback);
+    } else fallback();
+  }
+
+  stage.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-act]");
+    if (!b || b.disabled) return;
+    act(b.getAttribute("data-act"), b);
+  });
+
+  stage.addEventListener("submit", function (e) {
+    if (e.target.id !== "ledgerForm") return;
+    e.preventDefault();
+    var what = $("lgWhat").value.trim(), change = $("lgChange").value.trim(), msg = $("ledgerMsg");
+    if (!what) { msg.textContent = "Add a sentence about what you did first."; $("lgWhat").focus(); return; }
+    ledger.push({ act: $("lgAct").value, what: what, change: change });
+    save(LEDGER_KEY, JSON.stringify(ledger));
+    $("lgWhat").value = ""; $("lgChange").value = "";
+    $("ledgerOut").innerHTML = ledgerListHtml();
+    msg.textContent = "Added. That is micro-leadership you have already done.";
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (dlg.open) return;
+    if (e.target.closest && e.target.closest("input, textarea, select")) return;
+    if (!/^[1-4]$/.test(e.key)) return;
+    var b = stage.querySelector(".choice[data-key=\"" + e.key + "\"]");
+    if (b && !b.disabled) { e.preventDefault(); b.click(); }
+  });
+
+  /* ---------- rules and reset ---------- */
+  var lastFocus = null;
+  function openRules() {
+    lastFocus = document.activeElement;
+    if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
+    $("rulesClose").focus();
+  }
+  function closeRules() {
+    if (typeof dlg.close === "function") dlg.close(); else dlg.removeAttribute("open");
+  }
+  $("rulesBtn").addEventListener("click", openRules);
+  $("rulesClose").addEventListener("click", closeRules);
+  dlg.addEventListener("close", function () { if (lastFocus && lastFocus.focus) lastFocus.focus(); });
+  dlg.addEventListener("click", function (e) { if (e.target === dlg) closeRules(); });
+
+  $("resetBtn").addEventListener("click", function () {
+    var btn = $("resetBtn");
+    var midGame = ui && ui.phase !== "intro" && ui.phase !== "end";
+    if (midGame && !btn.classList.contains("armed")) {
+      btn.classList.add("armed");
+      btn.textContent = "Sure? Reset";
+      announce("Press reset again to lose this game and start over.");
+      resetTimer = setTimeout(function () { btn.classList.remove("armed"); btn.textContent = "Reset"; }, 4000);
+      return;
+    }
+    clearTimeout(resetTimer);
+    btn.classList.remove("armed");
+    btn.textContent = "Reset";
+    ui = fresh();
+    renderBoard();
+    renderIntro();
+    announce("Game reset.");
+  });
+
+  ui = fresh();
+  renderBoard();
+  renderIntro(true);
+})();
+</script>
+</body>
+</html>

@@ -10,6 +10,8 @@ Workshop materials and interactive tools for Coaching 1. Static HTML files with 
 - `signal-tower.html` — Signal Tower: a 10–15 minute single-player simulation on leading, lagging, vanity and guardrail indicators. Seeded and deterministic, in-browser test suite at `?test=1`. Design notes and calibration record in `signal-tower.md`
 - `signal-tower.md` — Model changes from the design spec, calibration record and instructor notes for Signal Tower
 - `tests/signal-tower.mjs` — Node test harness for `signal-tower.html` (built-ins only): `node tests/signal-tower.mjs`, or `--full` for 200 seeds per policy
+- `microleadership-ripple.html` — Ripple: an 8-minute single-player game on micro-leadership (Alex Budak) for changemaking. Five days of spotting micro-leadership versus micromanagement and choosing small acts under an energy budget; trust compounds into teammates' output and ripples. Scored against a beam-searched maximum (`MAX_SCORE`), with a personal best and an unscored reflection ledger in `localStorage`
+- `tests/ripple.mjs` — Node test harness for `microleadership-ripple.html` (built-ins only): `node tests/ripple.mjs`
 
 ## Adding files (mandatory)
 
@@ -29,7 +31,7 @@ grep -o 'href="[^"]*\.html"' index.html | cut -d'"' -f2 | while read f; do [ -f 
 
 ## Testing
 
-After changing `signal-tower.html`, run `node tests/signal-tower.mjs` (or open `signal-tower.html?test=1`). All tests must pass.
+After changing `signal-tower.html`, run `node tests/signal-tower.mjs` (or open `signal-tower.html?test=1`). All tests must pass. After changing `microleadership-ripple.html`, run `node tests/ripple.mjs`; if you change any option's cost or effects, update `MAX_SCORE` to the value the test reports.
 
 ## Conventions
 
@@ -37,4 +39,4 @@ After changing `signal-tower.html`, run `node tests/signal-tower.mjs` (or open `
 - JavaScript strings use straight quotes, never Unicode smart/curly quotes
 - No external dependencies — everything is inline, and files must work opened from the file system and from GitHub Pages
 - UK English spelling throughout
-- `index.html` follows the Bauhaus style of the `mxtdnl/third-places` landing page: cream background (`--bg: #F2DFBE`), zero border-radius, uppercase card titles, and the eight `--char-N` accent colours defined on `:root`. Signal Tower keeps its own palette, recorded in `signal-tower.md`
+- `index.html` follows the Bauhaus style of the `mxtdnl/third-places` landing page: cream background (`--bg: #F2DFBE`), zero border-radius, uppercase card titles, and the eight `--char-N` accent colours defined on `:root`. Signal Tower keeps its own palette, recorded in `signal-tower.md`; Ripple keeps its own risograph palette
